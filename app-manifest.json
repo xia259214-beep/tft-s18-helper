@@ -1,0 +1,31 @@
+{
+  "name": "云顶助手 · S18 自然之力",
+  "short_name": "云顶助手",
+  "description": "云顶之弈 S18 作战台：开局引导、阵容棋盘、经济规划、海克斯决策",
+  "start_url": "./index.html?sharecode=WMGGSW3OBW",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0d1117",
+  "theme_color": "#0d1117",
+  "icons": [
+    {
+      "src": "app-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "app-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "app-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
