@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<script src="nav.js"></script><script src="i18n.js"></script><meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<link rel="manifest" href="app-manifest.json?v=3">
+<meta name="theme-color" content="#0d1117">
+<link rel="icon" type="image/png" href="app-icon-192.png">
+
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon-180.png">
+<link rel="apple-touch-icon" sizes="167x167" href="apple-touch-icon-167.png">
+<link rel="apple-touch-icon" sizes="152x152" href="apple-touch-icon-152.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="云顶助手">
+
+<link rel="shortcut icon" href="app-icon.ico">
+<meta property="og:title" content="云顶作战手册 · S18 自然之力">
+<meta property="og:description" content="云顶助手 · S18 自然之力：开局引导 / 阵容棋盘 / 海克斯 / 经济规划">
+<meta property="og:image" content="https://tft-s18-helper.app.workbuddy.host/app-icon-512.png">
+<meta property="og:image:width" content="512">
+<meta property="og:image:height" content="512">
+<meta property="og:type" content="website">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>云顶作战手册 · S18 自然之力</title>
+<style>
+  :root{
+    --bg:#0a0e16; --panel:#121926; --panel2:#192233; --panel3:#1f2b3f;
+    --line:rgba(255,255,255,.075);
+    --gold:#f5b942; --teal:#4dd4c0; --red:#ff6b6b; --blue:#5aa9ff; --purple:#a78bfa; --green:#5ec269;
+    --txt:#e9eef7; --dim:#8b98ad; --faint:#5d6b80;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    background:radial-gradient(1100px 520px at 82% -8%, #1a2942 0%, #0a0e16 58%);
+    color:var(--txt); font-family:"Microsoft YaHei","PingFang SC",system-ui,sans-serif;
+    min-height:100vh; padding:22px 18px 70px; font-size:13.5px; line-height:1.62;
+  }
+  .wrap{max-width:1240px; margin:0 auto;}
+  header{display:flex; align-items:baseline; gap:13px; margin-bottom:6px; flex-wrap:wrap;}
+  h1{font-size:21px; font-weight:600; letter-spacing:.4px;}
+  h1 em{color:var(--gold); font-style:normal;}
+  .ver{font-size:11.5px; color:var(--faint); padding:2px 8px; border:1px solid var(--line); border-radius:20px;}
+  .tagline{color:var(--dim); font-size:12.5px; margin-bottom:16px;}
+
+  /* tabs */
+  nav{display:flex; gap:6px; margin-bottom:18px; flex-wrap:wrap; border-bottom:1px solid var(--line); padding-bottom:0;}
+  nav button{
+    background:none; border:none; border-bottom:2px solid transparent; color:var(--dim);
+    font-family:inherit; font-size:13.5px; padding:9px 15px 11px; cursor:pointer; transition:.15s;
+  }
+  nav button:hover{color:var(--txt);}
+  nav button.on{color:var(--gold); border-bottom-color:var(--gold); font-weight:600;}
+  section{display:none;} section.on{display:block; animation:fade .22s ease;}
+  @keyframes fade{from{opacity:0; transform:translateY(4px)} to{opacity:1; transform:none}}
+
+  .card{background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:17px;}
+  .card h2{font-size:12px; font-weight:600; color:var(--dim); letter-spacing:1.4px; margin-bottom:13px; text-transform:uppercase;}
+  .hint{font-size:11.5px; color:var(--faint); margin-top:5px; line-height:1.6;}
+
+  /* ===== 阵容库 ===== */
+  .complist{display:flex; flex-direction:column; gap:7px;}
+  .compitem{
+    background:var(--panel); border:1px solid var(--line); border-radius:11px; padding:11px 14px;
+    cursor:pointer; transition:.15s; display:flex; align-items:center; gap:11px;
+  }
+  .compitem:hover{border-color:rgba(245,185,66,.4); background:var(--panel2);}
+  .compitem.on{border-color:var(--gold); background:linear-gradient(90deg,rgba(245,185,66,.1),var(--panel2));}
+  .rank{font-size:11px; color:var(--faint); width:16px; text-align:center; font-variant-numeric:tabular-nums;}
+  .tier{
+    font-size:11px; font-weight:700; width:26px; height:26px; border-radius:7px; flex-shrink:0;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .tier.S{background:rgba(245,185,66,.18); color:var(--gold); border:1px solid rgba(245,185,66,.45);}
+  .tier.A{background:rgba(90,169,255,.15); color:var(--blue); border:1px solid rgba(90,169,255,.4);}
+  .tier.B{background:rgba(139,152,173,.14); color:var(--dim); border:1px solid rgba(139,152,173,.3);}
+  .cname{flex:1; font-size:14px; font-weight:500;}
+  .cmeta{font-size:11.5px; color:var(--faint); font-variant-numeric:tabular-nums;}
+
+  .detail{margin-top:16px;}
+  .dhead{display:flex; align-items:flex-start; gap:14px; margin-bottom:14px;}
+  .dhead h3{font-size:19px; font-weight:600; margin-bottom:3px;}
+  .statrow{display:flex; gap:16px; flex-wrap:wrap; margin-top:6px;}
+  .stat{font-size:11.5px; color:var(--faint);}
+  .stat b{color:var(--txt); font-size:14px; font-weight:600; font-variant-numeric:tabular-nums; margin-right:2px;}
+  .stat b.gold{color:var(--gold);} .stat b.teal{color:var(--teal);} .stat b.red{color:var(--red);}
+
+  .codebox{
+    background:var(--panel2); border:1px dashed rgba(245,185,66,.3); border-radius:9px;
+    padding:9px 12px; font-family:ui-monospace,Consolas,monospace; font-size:11.5px; color:var(--gold);
+    word-break:break-all; margin:12px 0; display:flex; justify-content:space-between; gap:10px; align-items:center;
+  }
+  .codebox button{background:rgba(245,185,66,.14); border:1px solid rgba(245,185,66,.35); color:var(--gold);
+    border-radius:6px; padding:4px 10px; font-size:11px; cursor:pointer; font-family:inherit; white-space:nowrap;}
+  .codebox button:hover{background:rgba(245,185,66,.25);}
+
+  .traits{display:flex; gap:7px; flex-wrap:wrap; margin-bottom:14px;}
+  .tr{background:var(--panel3); border-radius:7px; padding:3px 10px; font-size:12px;}
+  .tr b{color:var(--gold); margin-left:3px;}
+
+  table{width:100%; border-collapse:collapse; font-size:12.5px; font-variant-numeric:tabular-nums;}
+  th{text-align:left; font-weight:500; color:var(--dim); font-size:11px; padding:7px 8px; border-bottom:1px solid var(--line); white-space:nowrap;}
+  td{padding:7px 8px; border-bottom:1px solid rgba(255,255,255,.04); vertical-align:top;}
+  .cost{display:inline-block; width:16px; height:16px; line-height:16px; text-align:center; border-radius:4px;
+    font-size:10px; font-weight:700; margin-right:5px;}
+  .c1{background:#3a4254; color:#c9d3e2;} .c2{background:#1f4d3a; color:#6ee7a8;}
+  .c3{background:#1e3a63; color:#7fb4ff;} .c4{background:#43246b; color:#c4a6ff;}
+  .c5{background:#66420f; color:#ffcf70;}
+  .role{font-size:11px; color:var(--faint); white-space:nowrap;}
+  .role.main{color:var(--gold); font-weight:600;}
+  .items{color:var(--dim); font-size:12px;}
+
+  .blk{margin-top:15px;}
+  .blk h4{font-size:12px; color:var(--gold); letter-spacing:.8px; margin-bottom:7px; font-weight:600;}
+  .blk p{font-size:12.5px; color:#c3ccdb; line-height:1.75;}
+  .adv{display:flex; gap:9px; padding:9px 12px; border-radius:9px; background:var(--panel2);
+       border-left:3px solid var(--dim); margin-bottom:7px; font-size:12.5px; align-items:flex-start;}
+  .adv.danger{border-left-color:var(--red); background:rgba(255,107,107,.07);}
+  .adv.warn{border-left-color:var(--gold); background:rgba(245,185,66,.07);}
+  .adv.good{border-left-color:var(--teal); background:rgba(77,212,192,.06);}
+  .adv .ico{flex-shrink:0;}
+  .adv .t{color:var(--dim); font-size:12px; margin-top:2px; line-height:1.7;}
+
+  .pill{display:inline-block; padding:2px 9px; border-radius:6px; font-size:11.5px; margin:0 4px 4px 0;
+    background:rgba(77,212,192,.11); color:var(--teal); border:1px solid rgba(77,212,192,.22);}
+  .pill.bad{background:rgba(255,107,107,.1); color:var(--red); border-color:rgba(255,107,107,.22);}
+  .pill.mid{background:rgba(245,185,66,.1); color:var(--gold); border-color:rgba(245,185,66,.22);}
+
+  /* ===== 经济规划 ===== */
+  .grid2{display:grid; grid-template-columns:330px 1fr; gap:16px; align-items:start;}
+  @media(max-width:920px){ .grid2{grid-template-columns:1fr;} }
+  .field{margin-bottom:12px;}
+  .field label{display:block; font-size:12px; color:var(--dim); margin-bottom:4px;}
+  .field input, .field select{
+    width:100%; background:var(--panel2); border:1px solid var(--line); border-radius:8px;
+    padding:8px 10px; color:var(--txt); font-size:13.5px; font-family:inherit; outline:none; transition:border-color .15s;
+  }
+  .field input:focus, .field select:focus{border-color:var(--gold);}
+  .row2{display:grid; grid-template-columns:1fr 1fr; gap:9px;}
+  .kpis{display:grid; grid-template-columns:repeat(3,1fr); gap:11px; margin-bottom:16px;}
+  @media(max-width:700px){ .kpis{grid-template-columns:1fr;} }
+  .kpi{background:linear-gradient(160deg,var(--panel2),var(--panel)); border:1px solid var(--line);
+       border-radius:11px; padding:13px 15px; position:relative; overflow:hidden;}
+  .kpi::after{content:''; position:absolute; left:0; top:0; bottom:0; width:3px; background:var(--gold); opacity:.75;}
+  .kpi.k2::after{background:var(--teal);} .kpi.k3::after{background:var(--blue);}
+  .kpi .k{font-size:11.5px; color:var(--dim);}
+  .kpi .v{font-size:24px; font-weight:600; margin-top:1px; font-variant-numeric:tabular-nums;}
+  .kpi .n{font-size:11px; color:var(--faint); margin-top:2px;}
+  .intbar{display:flex; gap:5px; margin-top:9px;}
+  .intbar .seg{flex:1; height:28px; border-radius:5px; background:var(--panel2); border:1px solid var(--line);
+    display:flex; flex-direction:column; align-items:center; justify-content:center; font-size:10.5px; color:var(--faint); transition:.2s;}
+  .intbar .seg.on{background:rgba(245,185,66,.16); border-color:rgba(245,185,66,.5); color:var(--gold); font-weight:600;}
+  tr.hl td{background:rgba(245,185,66,.055);}
+  .up{color:var(--teal);} .down{color:var(--red);}
+  details{margin-top:14px; border-top:1px solid var(--line); padding-top:11px;}
+  summary{cursor:pointer; color:var(--dim); font-size:12px; outline:none;}
+  summary:hover{color:var(--gold);}
+  .param{display:grid; grid-template-columns:repeat(auto-fill,minmax(82px,1fr)); gap:7px; margin-top:10px;}
+  .param .p{background:var(--panel2); border:1px solid var(--line); border-radius:7px; padding:5px 7px;}
+  .param .p span{display:block; font-size:10px; color:var(--faint);}
+  .param .p input{width:100%; background:transparent; border:none; color:var(--txt); font-size:12.5px; outline:none; font-family:inherit;}
+
+  /* ===== 海克斯 ===== */
+  .auggrid{display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:11px;}
+  .aug{background:var(--panel); border:1px solid var(--line); border-radius:11px; padding:13px 15px;}
+  .aug .nm{font-size:13.5px; font-weight:600; margin-bottom:3px;}
+  .aug .ty{font-size:10.5px; color:var(--faint); margin-bottom:6px; letter-spacing:.5px;}
+  .aug .ds{font-size:12px; color:#b9c4d4; line-height:1.7;}
+  .aug .use{font-size:11.5px; color:var(--teal); margin-top:6px;}
+  .aug.top{border-color:rgba(245,185,66,.38); background:linear-gradient(165deg,rgba(245,185,66,.06),var(--panel));}
+
+  /* ===== 决策 ===== */
+  .flow{display:flex; flex-direction:column; gap:10px;}
+  .step{display:flex; gap:12px; background:var(--panel); border:1px solid var(--line); border-radius:11px; padding:13px 15px;}
+  .step .num{
+    width:24px; height:24px; border-radius:7px; background:rgba(245,185,66,.15); color:var(--gold);
+    display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; flex-shrink:0;
+  }
+  .step .bd{flex:1;}
+  .step .bd b{font-size:13.5px; display:block; margin-bottom:3px;}
+  .step .bd span{font-size:12.5px; color:#b9c4d4; line-height:1.75;}
+
+  .foot{margin-top:22px; font-size:11px; color:#4e5c70; line-height:1.85; border-top:1px solid var(--line); padding-top:12px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>云顶<em data-i18n="mn_manual">作战手册</em></h1>
+    <span class="ver" data-i18n="bd_ver">S18 自然之力 · 18.6</span>
+  </header>
+  <div class="tagline" data-i18n="mn_tagline">阵容怎么拿、海克斯怎么选、拿错了怎么救、什么时候该收手</div>
+
+  <nav>
+    <button class="on" data-tab="comps"><span data-i18n="mn_tab_comps">阵容库</span></button>
+    <button data-tab="econ"><span data-i18n="mn_tab_econ">经济规划</span></button>
+    <button data-tab="aug"><span data-i18n="mn_tab_aug">海克斯</span></button>
+    <button data-tab="plan"><span data-i18n="mn_tab_plan">判断与转型</span></button>
+  </nav>
+
+  <!-- ========== 阵容库 ========== -->
+  <section id="tab-comps" class="on">
+    <div class="grid2" style="grid-template-columns:300px 1fr;">
+      <div>
+        <div class="complist" id="compList"></div>
+        <div class="hint">按平均名次排序（越低越好）。名次和局数取自第三方统计站 Diamond+ 口径，随版本浮动，当参考不当答案。</div>
+      </div>
+      <div class="detail card" id="compDetail"></div>
+    </div>
+  </section>
+
+  <!-- ========== 经济规划 ========== -->
+  <section id="tab-econ">
+    <div class="grid2">
+      <div class="card">
+        <h2 data-i18n="mn_cur">当前局面</h2>
+        <div class="row2">
+          <div class="field"><label>阶段-回合</label><input id="round" value="4-1"></div>
+          <div class="field"><label>生命值</label><input id="hp" type="number" value="55" min="1" max="100"></div>
+        </div>
+        <div class="row2">
+          <div class="field"><label>等级</label><select id="level"></select></div>
+          <div class="field"><label>当前经验</label><input id="xp" type="number" value="0" min="0"></div>
+        </div>
+        <div class="row2">
+          <div class="field"><label>金币</label><input id="gold" type="number" value="42" min="0"></div>
+          <div class="field"><label>连胜 / 连败</label>
+            <select id="streak">
+              <option value="0">无</option>
+              <option value="2">连胜 2-4</option>
+              <option value="5">连胜 5</option>
+              <option value="6">连胜 6+</option>
+              <option value="-2">连败 2-4</option>
+              <option value="-5">连败 5</option>
+              <option value="-6">连败 6+</option>
+            </select>
+          </div>
+        </div>
+        <div class="row2">
+          <div class="field"><label>目标等级</label><select id="target"></select></div>
+          <div class="field"><label>本回合计划花费</label><input id="spend" type="number" value="0" min="0"></div>
+        </div>
+        <div class="hint">利息按 10 取整：花掉可能掉档，算清再花。</div>
+        <details>
+          <summary>经验表（版本变动可改）</summary>
+          <div class="param" id="paramXP"></div>
+          <div class="hint">默认值对应 2026-09-10 热更新后：7→8 为 56，8→9、9→10 各 64。</div>
+        </details>
+      </div>
+      <div>
+        <div class="kpis">
+          <div class="kpi"><div class="k">本回合总收入</div><div class="v" id="kIncome">—</div><div class="n" id="kIncomeDetail">基础 + 利息 + 连胜</div></div>
+          <div class="kpi k2"><div class="k">下回合可用</div><div class="v" id="kNext">—</div><div class="n" id="kNextDetail">含本回合花费后</div></div>
+          <div class="kpi k3"><div class="k">升到 Lv.<span id="kTgt">8</span></div><div class="v" id="kXpGold">—</div><div class="n" id="kXpDetail">—</div></div>
+        </div>
+        <div class="card">
+          <h2 data-i18n="mn_interest">利息档位</h2>
+          <div class="intbar" id="intbar"></div>
+          <div class="hint" id="intHint">—</div>
+          <div style="margin-top:16px">
+            <h2 style="margin-bottom:9px" data-i18n="mn_sim">接下来 8 回合推演</h2>
+            <table>
+              <thead><tr><th>回合</th><th>等级</th><th>开始金币</th><th>收入</th><th>利息</th><th>连胜</th><th>容错</th></tr></thead>
+              <tbody id="simBody"></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="card" style="margin-top:14px">
+          <h2 data-i18n="mn_todo">该怎么做</h2>
+          <div id="advice"></div>
+        </div>
+        <div class="foot">
+          收入规则：1-2/1-3 各 2 金，1-4 为 3 金，2-1 为 4 金，2-2 起每回合 5 金；PVP 胜利 +1；
+          连胜/连败 2-4 连 +1、5 连 +2、6 连及以上 +3；利息每 10 金 +1、上限 5。每回合自然 +2 经验，买经验 4 金 = 4 点，刷新 2 金。
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== 海克斯 ========== -->
+  <section id="tab-aug">
+    <div class="card" style="margin-bottom:14px">
+      <h2 data-i18n="mn_three">先记住三件事</h2>
+      <div class="flow">
+        <div class="step"><div class="num">1</div><div class="bd"><b>出现时机固定</b><span>2-1、3-2、4-2 各给一次，每次三选一，每个还能免费刷一次。所以 4-2 那次是最后的补救机会，别乱选。</span></div></div>
+        <div class="step"><div class="num">2</div><div class="bd"><b>前期拿经济，后期拿战力</b><span>2-1 和 3-2 拿经济类，等于用符文换等级和刷新；4-2 还拿经济，通常说明你这局已经打算躺了。反过来，2-1 拿战力在运营阵容里基本是浪费。</span></div></div>
+        <div class="step"><div class="num">3</div><div class="bd"><b>符文要匹配阵容的费用结构</b><span>九五阵容缺的是"多打一次刷新"，赌狗缺的是"多一张牌"，八条二档缺的是"全队都加一点"。同一枚符文在不同阵容里价值能差一倍。</span></div></div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:14px">
+      <h2 data-i18n="mn_rescue">拿错了怎么救 · 替换决策表</h2>
+      <table>
+        <thead><tr><th style="width:22%">你拿到的东西</th><th style="width:26%">什么时候算拿错</th><th>怎么救</th></tr></thead>
+        <tbody id="fixBody"></tbody>
+      </table>
+    </div>
+
+    <h2 style="font-size:12px;color:var(--dim);letter-spacing:1.4px;margin:18px 0 10px" data-i18n="mn_auglib">高频符文库</h2>
+    <div class="auggrid" id="augGrid"></div>
+
+    <div class="card" style="margin-top:14px">
+      <h2 data-i18n="mn_break">纹章 / 自然之力的断点规矩</h2>
+      <p style="font-size:12.5px;color:#c3ccdb;margin-bottom:9px">
+        S18 的纹章不是"给了就变强"，它只做一件事：把某条羁绊顶一档。所以判断标准只有一个——<b style="color:var(--gold)">这张纹章能不能跨过一个真实存在的断点</b>。
+      </p>
+      <div id="emblemList"></div>
+    </div>
+  </section>
+
+  <!-- ========== 判断与转型 ========== -->
+  <section id="tab-plan">
+    <div class="card" style="margin-bottom:14px">
+      <h2 data-i18n="mn_win">开局先决定：这局你怎么赢</h2>
+      <div class="flow" id="winPlans"></div>
+    </div>
+    <div class="card" style="margin-bottom:14px">
+      <h2 data-i18n="mn_stage">每个阶段该看什么数字</h2>
+      <table>
+        <thead><tr><th style="width:14%">阶段</th><th style="width:30%">看这个</th><th>合格线 / 动作</th></tr></thead>
+        <tbody id="stageBody"></tbody>
+      </table>
+    </div>
+    <div class="card">
+      <h2 data-i18n="mn_signal">这些信号出现，立刻换路子</h2>
+      <div class="flow" id="giveUpList"></div>
+    </div>
+  </section>
+
+  <div class="foot">
+    <span data-i18n="mn_foot1">数据来源：国服 18.6 版本游戏内数据文件；第三方统计站 tftcodex.com Diamond+ 排位样本（2026-11-10，近 6 天）。</span>
+    <span data-i18n="mn_foot2">阵容强度会随热更新变动。</span><b data-i18n="mn_foot3">阵容码</b><span data-i18n="mn_foot4">可粘贴进游戏内「队伍规划器」一键导入，导入后按站位图手动摆位。</span>
+  </div>
+</div>
+
+<script src="i18n.js"></script>
+<script src="auth.js"></script>
+<script>
+/* =========================================================
+   阵容数据
+   avg = 平均名次（越低越好）  top4 / win = 前四率 / 吃鸡率(%)
+   games = 样本局数  pick = 选取率(%)
+   ========================================================= */
+const COMPS = [
+  {
+    id:'draven', name:'巨龙德莱文', tier:'S', avg:4.15, top4:53.7, win:24.3, games:93440, pick:8.2,
+    pop:'9 人口 / 只站 8 张牌', style:'快九 · 攒钱一波搜',
+    code:'024153ed43042840b3fc4043fb000000TFTSet18',
+    traits:[['峡谷野怪',3],['地狱火',2],['主宰',2],['重装战士',2],['顶级掠食者',1],['赏金猎人',1],['翠神',1],['远古树精',1],['宝石骑士',1]],
+    units:[
+      {n:'德莱文',c:5,role:'主 C',items:['鬼索的狂暴之刃','海妖之怒','死亡之刃']},
+      {n:'远古巨龙',c:5,role:'副 C',items:['无尽之刃','最后的轻语','强袭者的链枷']},
+      {n:'茂凯',c:5,role:'主坦',items:['石像鬼石板甲','狂徒铠甲','振奋盔甲']},
+      {n:'凯南',c:5,role:'副 C',items:['窃贼手套']},
+      {n:'艾翁',c:5,role:'功能',items:['功能装 / 种子位']},
+      {n:'塔里克',c:5,role:'前排',items:['翡翠配对给德莱文']},
+      {n:'阿木木',c:4,role:'前排',items:['肉装']},
+      {n:'苍蓝雕纹魔像',c:4,role:'前排',items:['肉装 / 阿尔法印记']}
+    ],
+    flow:'2-1 上 4，抓大剑和弓，有二星就上，没有就连败攒钱。3-2 上 6，凑出野怪三档。四阶段死保 50 金利息，牌全卖了都不心疼——这个等级池里没有你要的东西。5-1 上 9 开搜，平均 33 抽（66 金）能把德莱文搜到二星；有同行抢就按 54 抽备预算。',
+    pos:'茂凯、阿木木、塔里克、苍蓝雕纹魔像一字排开顶第一排；凯南第二排左侧，冲刺穿人堆放火风暴；远古巨龙压第二排正中，普攻溅射能扫到相邻每一格；德莱文沉底靠左，艾翁站他侧后方。对面有刺客就把德莱文往中间收一格。',
+    aug:{top:['升级咯','贸易中心','新纪元','棱彩门票'],ok:['黄金赌约','对冲基金','野怪出没'],bad:['纯战力符文（不如多一次刷新）']},
+    giveUp:'唯一信号是「抢」。无人抢时名次 3.75，一家 4.08，两家以上直接掉到 4.37——而 45% 的对局都有人抢。二阶段看一眼对手有没有人摆德莱文的散件、商店里德莱文和巨龙来没来过。两家明牌抢而你一张没白嫖到，掉头走永森德莱文线，同一张 C、同一套装备，茂凯和凯南都能带走。',
+    mistakes:['九人口却想站满九张牌——远古巨龙占两个格，那个空格不是缺陷','五阶段之前把钱花在四费卡上','为了凑羁绊去拿第五张五费的一档羁绊'],
+    note:'这套的强度来自八个高费棋子各自的技能，羁绊只是胶水。地狱火、主宰、重装全停在最低档，别为了拉高某一条羁绊拆人。'
+  },
+  {
+    id:'forest', name:'永森德莱文', tier:'S', avg:4.20, top4:52.7, win:22.4, games:47689, pick:4.2,
+    pop:'9 人口', style:'快九 · 永森经济线',
+    code:'（暂无校验过的阵容码，按站位表手动摆）',
+    traits:[['永恒之森',3],['斗士',2],['裁决使',2]],
+    units:[
+      {n:'德莱文',c:5,role:'主 C',items:['鬼索的狂暴之刃','海妖之怒','死亡之刃']},
+      {n:'茂凯',c:5,role:'前排',items:['石像鬼石板甲','狂徒铠甲','振奋盔甲']},
+      {n:'凯南',c:5,role:'副 C',items:['窃贼手套']},
+      {n:'艾翁',c:5,role:'功能',items:['种子位 / 增益格']},
+      {n:'塔里克',c:5,role:'前排',items:['翡翠配对']}
+    ],
+    flow:'和巨龙德莱文同一条起跑线：2-1 上 4、3-2 上 6、四阶段保 50 金、5-1 上 9 搜德莱文二星。区别在于永恒之森给的成长属性让前排更耐打，容错比纯九五高一点，代价是上限低一截。',
+    pos:'前排一字排开吃永恒之森成长，德莱文沉底最远角，艾翁贴着他保证种子能种到脚下。',
+    aug:{top:['升级咯','贸易中心','新纪元'],ok:['对冲基金','黄金赌约'],bad:['双物理装类符文（德莱文三件已固定）']},
+    giveUp:'德莱文被两家以上抢，或者 5-1 上九时钱不够 60——这套没九就没强度，硬留只会第五第六。降级玩法：留在 8 人口把茂凯和凯南升二星，保前四。',
+    mistakes:['把永森当成主羁绊去追 5 档，其实 3 档就够','和巨龙德莱文抢同一批五费，两家互耗'],
+    note:'这是巨龙德莱文的退路，两份数据里共用同一个 C 和同一套装备，什么牌先来走哪条。'
+  },
+  {
+    id:'riftbeast', name:'峡谷树怪', tier:'S', avg:4.19, top4:55.7, win:14.0, games:85564, pick:7.5,
+    pop:'8 人口', style:'八级开搜',
+    code:'（暂无校验过的阵容码，按站位表手动摆）',
+    traits:[['峡谷野怪',3],['主宰',2],['重装战士',2]],
+    units:[
+      {n:'绯红印记树怪',c:4,role:'主 C',items:['法系输出三件 / 饮血续航']},
+      {n:'苍蓝雕纹魔像',c:4,role:'主坦',items:['圣盾使的誓约三件']},
+      {n:'巨喙鸟（深红锋喙鸟）',c:3,role:'副 C',items:['攻速装']},
+      {n:'峡谷迅捷蟹',c:2,role:'前排',items:['肉装']}
+    ],
+    flow:'8 人口成型，四阶段拉八一次搜完。峡谷野怪三档给阿尔法印记，印记给主 C 还是主坦看你这局缺输出还是缺前排。',
+    pos:'野怪单位站前排扛伤，主 C 站后排最远角，印记单位贴近主力输出。',
+    aug:{top:['装备类（快速成型三件套）','战力类'],ok:['经济类（若四阶段前血线健康）'],bad:['纯九五经济符文（这套不需要上九）']},
+    giveUp:'树怪的治疗被 18.5 削弱过一轮，如果四阶段搜完主 C 只有一张，直接转主宰婕拉——同一批前排，换一个 C。',
+    mistakes:['把印记给主坦却指望输出够','在八人口继续追三（四费追三是把钱倒进海里）'],
+    note:'样本量全场前三（85,564 局）。它前四率 55.7% 是九套里最高的——稳到几乎不空车，但吃鸡率只有 14%，登顶靠的是后面几轮的运营细节。想要稳定上分选它，想吃鸡把每回合的对位摆进去。'
+  },
+  {
+    id:'yunara', name:'日蚀芸阿娜', tier:'A', avg:4.38, top4:53.0, win:13.6, games:67263, pick:5.9,
+    pop:'7 人口 / 五级开搜', style:'一费赌狗 · 五级停手',
+    code:'0241142743a40a41040743b000000000TFTSet18',
+    traits:[['日蚀骑士',3],['花仙子',3]],
+    units:[
+      {n:'卡尔玛',c:1,role:'主 C',items:['蓝霸符','法系输出']},
+      {n:'蕾欧娜',c:1,role:'前排',items:['肉装']},
+      {n:'约里克',c:1,role:'前排',items:['肉装']},
+      {n:'瑟庄妮',c:2,role:'前排',items:['肉装']},
+      {n:'芸阿娜',c:2,role:'副 C',items:['物理 / 攻速']},
+      {n:'凯尔',c:2,role:'补位',items:['按牌面补']},
+      {n:'乐芙兰',c:2,role:'补位',items:['按牌面补']}
+    ],
+    flow:'五级把七个位置摆满就不再加等级。追三名单是卡尔玛、蕾欧娜、约里克三张一费，加瑟庄妮、芸阿娜两张二费——五个三星就算毕业，凯尔和乐芙兰按牌面补，能三就三。',
+    pos:'前排三个一字顶住，卡尔玛站最后排最远角，芸阿娜在她侧翼吃日蚀的额外魔法伤害。',
+    aug:{top:['蓝霸符相关的装备符文','法系输出符文'],ok:['经济类（五级开搜需要钱）'],bad:['升级类符文（这套不升级，等于白拿）']},
+    giveUp:'三张一费差两张以上还没三星、四阶段血线掉到 30 以下，说明这局的牌池不给你面子，把日蚀纹章转给别的阵容或者直接转常规运营。',
+    mistakes:['二阶段就把拳套合进裁决使纹章——结果四阶段都没见过第二张蕾欧娜','提前上等级，商店结构被摊薄，追三时间往后推两个阶段'],
+    note:'67,263 局，A 档里玩得最多的一套，但它不是 S 档。人多、名次中上、还不上扬——说明这是沉下来的常规解法，不是被带火的新套路。日蚀骑士的精髓是按三星数量把额外魔法伤害换成真实伤害，所以追三就是强度本身。'
+  },
+  {
+    id:'ahri', name:'神谕阿狸', tier:'A', avg:4.38, top4:52.9, win:11.6, games:50542, pick:4.5,
+    pop:'8 人口', style:'Fast 8 · 四阶段开搜',
+    code:'0243042840f42a4294073e9418000000TFTSet18',
+    traits:[['神谕',4],['灵魂莲华',3],['峡谷野怪',3]],
+    units:[
+      {n:'阿狸',c:4,role:'主 C',items:['神谕纹章','珠光护手','强袭者的链枷']},
+      {n:'莫甘娜',c:4,role:'副 C',items:['莫雷洛秘典','灭世者的死亡之帽','虚空之杖']},
+      {n:'苍蓝雕纹魔像',c:4,role:'主坦',items:['圣盾使的誓约 ×3']},
+      {n:'瑟提',c:4,role:'前排',items:['肉装']},
+      {n:'五费补位',c:5,role:'收尾',items:['来谁上谁']}
+    ],
+    flow:'四阶段拉八开搜，八人口四张四费加一张五费。不追三——四费追三的钱够你多搜两张两星，收益差得远。',
+    pos:'魔像背三件誓约顶最前面不停放大给全队回蓝，阿狸戴神谕纹章站后排，莫甘娜在另一侧撒重伤覆盖，瑟提填前排缺口。',
+    aug:{top:['纹章类（神谕纹章直接决定这套上限）','回蓝类'],ok:['技能暴击类','前排类'],bad:['物理强化符文（莫甘娜只能蹭到一点）']},
+    giveUp:'纹章一直不来，阿狸就只能当普通法师用，中期会被地狱火从头点到尾。八级搜了九块钱还见不到第一张阿狸，说明牌池里有人在抢，准备转重装莫甘娜。',
+    mistakes:['把神谕纹章给了别人——它在阿狸身上是把回蓝从全队最低档抬到最高档','只盯着神谕自己那一列（4→6），漏掉全队 1→2 那一列的翻倍'],
+    note:'核心机制：神谕 4 档是「队伍 2 点法力回复、神谕 6 点」。多数人只看到神谕自己从 4 跳到 6，真正被漏掉的是全队那一列从 1 变 2——场上不戴章的七个人，回蓝一起翻倍。'
+  },
+  {
+    id:'zyra', name:'主宰婕拉', tier:'B', avg:4.51, top4:49.8, win:11.3, games:24360, pick:2.1,
+    pop:'8 人口', style:'八级开搜',
+    code:'0242043a4273ed43742641b43c000000TFTSet18',
+    traits:[['主宰',6],['荆棘之兴',1],['召唤师',1],['野兽之灵',1],['魔战士',1]],
+    units:[
+      {n:'婕拉',c:4,role:'主 C',items:['大天使之杖','大天使之杖','海克斯科技枪刃']},
+      {n:'奈德丽',c:4,role:'副 C',items:['物理 / 攻速']},
+      {n:'洛',c:2,role:'前排',items:['肉装']},
+      {n:'约里克',c:1,role:'前排',items:['肉装']},
+      {n:'瑟庄妮',c:2,role:'前排',items:['肉装']},
+      {n:'阿木木',c:4,role:'前排',items:['石像鬼 / 狂徒']},
+      {n:'蔚',c:3,role:'前排',items:['肉装']},
+      {n:'峡谷迅捷蟹',c:2,role:'前排',items:['肉装']}
+    ],
+    flow:'八人口满编就停，不追三——婕拉和奈德丽都是四费，追三等于把钱倒进海里。剩下的钱上九找第二张五费，或者存着补二星。四阶段八级开搜。',
+    pos:'六个主宰全站前排承受伤害，婕拉站最后一排。主宰 6 档给主宰 42% 伤害减免，婕拉自己只吃到队伍那 8%——所以这套的胜负手是前排能撑多久，不是婕拉的面板。',
+    aug:{top:['前排类（坚守防线 / 男爵幻域）','回蓝类'],ok:['技能暴击类','经济类'],bad:['物理输出符文']},
+    giveUp:'前排站不住就没有这套。四阶段如果六个主宰只有两三个到二星，婕拉的大天使叠不起来，直接转回重装线用阿木木和蔚当骨架。',
+    mistakes:['给婕拉堆纯输出装——她的强度来自双大天使每五秒叠一层，需要时间','让婕拉站前排'],
+    note:'装备表第一眼很像写错了：主 C 三件里两件大天使、一件科技枪，一件纯输出都没有。但逻辑是通的——只要前排撑够时间，大天使自己会把法强叠上去，科技枪保证她不死。'
+  },
+  {
+    id:'nidalee', name:'兽灵奈德丽', tier:'A', avg:4.42, top4:53.0, win:8.1, games:35394, pick:3.1,
+    pop:'8 人口', style:'Fast 8 · 八条二档',
+    code:'0242042842b3ed41240e41b42c000000TFTSet18',
+    traits:[['魔战士',2],['护卫',2],['花仙子',2],['地狱火',2],['神谕',2],['重装战士',2],['主宰',2],['野兽之灵',2],['帝王斑蝶',1],['猎人',1]],
+    units:[
+      {n:'奈德丽',c:4,role:'主 C',items:['饮血剑','夜之锋刃','斯特拉克的挑战护手']},
+      {n:'希维尔',c:4,role:'副 C',items:['蓝霸符','死亡之刃','无尽之刃']},
+      {n:'阿木木',c:4,role:'主坦',items:['石像鬼石板甲','振奋盔甲','狂徒铠甲']},
+      {n:'莉莉娅',c:4,role:'副坦',items:['适应性头盔','圣盾使的誓约','振奋盔甲']},
+      {n:'苍蓝雕纹魔像',c:4,role:'前排',items:['纯挂件']},
+      {n:'洛',c:2,role:'连接器',items:['纯挂件']},
+      {n:'慎',c:2,role:'前排',items:['纯挂件']},
+      {n:'克格莫',c:3,role:'破甲',items:['纯挂件']}
+    ],
+    flow:'2-1 抢弓、第二顺位大剑；2-3 到 3-2 用蔚开野兽之灵；3-5 到 4-1 拉七，把霞换成希维尔；4-2 拉八一次搜完，顺序是奈德丽、阿木木、莉莉娅、希维尔，四个里有三个到两星就停手。',
+    pos:'五个前排连成一条线站第一排，洛和莉莉娅守两端，魔像和慎居中，阿木木紧挨莉莉娅。克格莫站第二排，奈德丽站第三排正中（标的枪挑最远的目标，站中间能把弹道拉成斜线绕过前排），希维尔缩最后一排靠左。',
+    aug:{top:['成吨的属性!','后排蓝图 / 前线地基','锅铲厨房 / 羁绊树'],ok:['任意纹章（这套羁绊多，基本都能用上）'],bad:['单一大羁绊强化类']},
+    giveUp:'三个信号：① 四阶段八人口搜完，奈德丽只有一张、希维尔也没两星，输出是空的，把无尽转给别的物理 C；② 场上有两家同行抢四费池；③ 无尽到四阶段还没合出来，伤害差一整档。',
+    mistakes:['把无尽给奈德丽——统计站数据明确：无尽只给希维尔，给她的人名次 4.30','把洛当一费垃圾卖掉（他一个人带花仙、主宰、重装三条羁绊，卖了他八条二档掉三条）','前排站太散（护卫的 25 双抗按人算，站散了每段都薄）'],
+    note:'这套没有一个超过 2 档的羁绊，它把八条羁绊的第一档一次买齐，用八份小属性叠成一个整体。好处是抗刀——18.5 砍了四费主 C 好几轮，这种散装结构反而不容易被一刀砍废。'
+  },
+  {
+    id:'aphelios', name:'重装厄斐琉斯', tier:'B', avg:4.62, top4:48.9, win:6.7, games:3367, pick:0.3,
+    pop:'8 人口', style:'八级开搜 · 塔里克连线',
+    code:'024034303fa4283f343c4223ef000000TFTSet18',
+    traits:[['重装战士',4],['峡谷野怪',3],['月蚀',2],['迅捷射手',2],['狂战士',2],['召唤师',2],['荆棘之兴',1],['宝石骑士',1]],
+    units:[
+      {n:'厄斐琉斯',c:4,role:'主 C',items:['死亡之刃','无尽之刃','红霸符']},
+      {n:'塔里克',c:5,role:'核心连线',items:['肉装 / 翡翠配对给厄斐琉斯']},
+      {n:'哨戒',c:2,role:'前排',items:['肉装']},
+      {n:'赫卡里姆',c:3,role:'前排',items:['肉装']},
+      {n:'黛安娜',c:3,role:'前排',items:['肉装']},
+      {n:'绯红印记树怪',c:4,role:'前排',items:['肉装']},
+      {n:'婕拉',c:4,role:'副 C',items:['法系']},
+      {n:'深红锋喙鸟',c:2,role:'功能',items:['羊刀（没有就输出差一截）']}
+    ],
+    flow:'八人口满编就停，四费四张加五费一张，追三等于做梦。钱用来补二星。',
+    pos:'五个前排撑第一排，重点是把厄斐琉斯拖到塔里克身上——两个人共享翡翠护盾和额外魔法伤害，这是这套唯一的上限来源。',
+    aug:{top:['前排类','重装战士强化'],ok:['技能暴击','攻速类'],bad:['九五经济符文（这套不上九）']},
+    giveUp:'塔里克八级才来的话前排散得太快，这套就只剩一个四费 C 硬撑。如果八级搜完塔里克影子都没有，把厄斐琉斯的三件转给希维尔，走兽灵奈德丽线。',
+    mistakes:['没做羊刀——锋喙鸟输出直接差一截','把塔里克当纯肉盾用，忘了他和厄斐琉斯的连线'],
+    note:'八个单位撑起八条羁绊，全部停在最低档或第二档。听着像八条腿走路，实际每条腿都只有半截——真正值钱的是塔里克那根线。'
+  }
+];
+
+/* 海克斯 */
+const AUGS = [
+  {nm:'升级咯',ty:'经济 · 等级',ds:'直接给你等级/经验，等于跳过一次攒钱。',use:'九五、Fast 8/Fast 9 阵容的第一顺位。',top:1},
+  {nm:'贸易中心',ty:'经济 · 等级',ds:'用经济换等级节奏。',use:'需要在 5-1 前上九的阵容。',top:1},
+  {nm:'新纪元',ty:'经济',ds:'滚雪球型经济符文。',use:'有连胜、能滚起来的开局。',top:1},
+  {nm:'棱彩门票',ty:'经济 · 刷新',ds:'换刷新次数。',use:'九五搜牌量大，刷新比金币更直接。'},
+  {nm:'对冲基金 / 储蓄账户 / 爆炸式增长+',ty:'经济 · 现金',ds:'直接把钱给你。',use:'需要提前到 50 金吃满利息的阵容。'},
+  {nm:'砍价高手 / 耐心学习 / 大买特买',ty:'经济 · 折扣',ds:'降购买成本或给经验。',use:'前期拿，配合慢 D 或赌狗。'},
+  {nm:'成吨的属性!',ty:'战力 · 全属性',ds:'队伍 88 生命、8% 物理法术加成、8 护甲魔抗、8% 攻速、8 法力。',use:'八条二档的散装阵容本命符文——每条羁绊都往上抬一格。',top:1},
+  {nm:'珠光莲花',ty:'战力 · 技能暴击',ds:'全队技能可以暴击，额外技能暴击给 10% 暴击伤害。',use:'法系多段伤害阵容（婕拉、莫甘娜、阿狸）。'},
+  {nm:'坚守防线',ty:'战力 · 前排',ds:'开战时前排每有一名弈子，后两排加法强和物理加成。',use:'四五个重装/主宰前排的阵容，等于白给四层属性。'},
+  {nm:'男爵幻域',ty:'战力 · 成长',ds:'随机坦装 + 8 秒后全队每秒叠 5% 双强。',use:'越拖越强的阵容（婕拉、拉露恩）。'},
+  {nm:'泪流成河 / 源计划上行链路',ty:'功能 · 回蓝',ds:'队伍回蓝加成。18.5 削过一轮但基数还在。',use:'神谕、法师、召唤类阵容。'},
+  {nm:'生日礼物',ty:'经济 · 送牌',ds:'每次升级给一个二星弈子，费用按当前等级算，上限五费。',use:'一路升级的运营阵容，等于每次点升级捡一张牌。'},
+  {nm:'烧起来',ty:'战力 · 地狱火',ds:'上回合伤害最高的地狱火弈子获得 40% 攻速，还送 1 个韦鲁斯和 1 个阿卡丽。',use:'地狱火体系的过渡救星，白送两张前排件。'},
+  {nm:'毛茸茸小朋友',ty:'本命 · 约德尔',ds:'约德尔羁绊激活时多一个召唤物，送提莫、维迦、可酷伯。',use:'约德尔/提莫体系必拿，同时解决召唤物和开局三张牌。'},
+  {nm:'存心失利',ty:'经济 · 连败',ds:'输掉对战后给 2 金和 1 次免费刷新。',use:'主动吃连败经济的阵容，输一场白赚一次 D。'},
+  {nm:'锅铲厨房 / 羁绊树 / 羁绊树+',ty:'装备 · 纹章',ds:'给随机纹章或羁绊加成。',use:'羁绊数量多的阵容随便来一枚都能用。注意羁绊树+ 和金色炊具现在互斥。'},
+  {nm:'加冕礼',ty:'装备 · 冠冕',ds:'给金铲铲冠冕，带 30% 法强。',use:'只有羁绊没排满的阵容才值得——排满了只能塞给挂件，等于花一个大符文买 30% 法强。'},
+  {nm:'潘朵拉的装备 II / 打捞桶+ / 英勇福袋++',ty:'装备 · 散件',ds:'换装、补散件、开袋。',use:'装备缺口大的阵容，前期拿了能救三件套。'}
+];
+
+/* 拿错了怎么救 */
+const FIXES = [
+  ['先拿了经济类，但阵容要战力',
+   '你在玩 8 人口成型、不需要上九的阵容',
+   '经济符文在这个阵容里等于白拿。补救：把它当成"提前到 50 金吃满利息"的工具，用省下的钱提前一回合到八级，把多出来的钱全砸在搜牌上。4-2 那次务必拿战力。'],
+  ['先拿了战力类，但你在玩九五',
+   '2-1 就拿了战力符文',
+   '九五的强度来自九级那一次大搜，前期战力只帮你少掉几滴血。补救：把战力符文当"保连胜"用，前中期用它守住血量，换取四阶段能安心攒钱不被打崩。'],
+  ['拿了物理强化，但你最后转成法系',
+   '2-1 拿的符文和最终阵容不匹配',
+   '18.5 之后系统会在你阵容偏某系时降低另一系符文的出现概率，所以这种错通常发生在二阶段。补救：转阵容时优先选一个"能吃物理装的副 C"，比如把物理装塞给希维尔或千珏，别让符文彻底空转。'],
+  ['拿了纹章，但它跨不过断点',
+   '这条羁绊当前 2 档，而断点是 2/4/6',
+   '这是最常见的浪费。补救：把纹章当成"给副 C 的转职装"，虽然不加羁绊，属性还在；或者留着，等场上凑到 3 张时它就能开 4 档。判断标准永远是——给了之后档位数变没变。'],
+  ['拿了升级类，但你是赌狗阵容',
+   '五级/六级停手的阵容',
+   '升级符文会打乱商店结构，追三时间往后推两个阶段。补救：宁可把多出来的人口空着也别提前点等级——六人口蘑菇那套的经验就是"自然之力不能提前花"。'],
+  ['三选一全是垃圾，刷了一次还是垃圾',
+   '4-2 最后一次机会遇到三个都不想要',
+   '这时候别赌运气了，选那个"最不容易后悔"的：给装备的 > 给钱的 > 给属性的。装备能立刻变成战力，钱在四阶段已经来不及滚雪球。']
+];
+
+/* 纹章断点 */
+const EMBLEMS = [
+  ['最值钱：一张就跨档', 'good', '裁决使 1→2、地狱火 2→3、猎人 1→2。一张纹章直接开一个新档位，收益立竿见影。'],
+  ['有用：能补齐差额', 'good', '神谕 2→3、法师 2→4（全队法强 10%→30%）、月蚀 2→4（攻速 7%→14%）。差额小、收益大。'],
+  ['别碰：卡在缝里', 'bad', '主宰 2→4、重装 2→4、护卫 2→4。你手上 2 张，补 1 张是 3 张，断点是 2/4/6——第 3 张不开档，纯浪费一枚纹章。'],
+  ['纯浪费：单挂已经满档', 'bad', '宝石骑士、翠神、远古树精、赏金猎人。这类羁绊一个单位就满档，纹章给它们等于扔掉。']
+];
+
+/* 赢法 */
+const PLANS = [
+  ['① 赌狗：追三换强度', '低费阵容（一费/二费追三）。用一个阶段的钱，把几张低费卡做到三星，靠星级碾压度过中期。', '适合：2-1 就摸到两三星、或者版本里低费卡没被抢。风险：追不出来就是第七第八。'],
+  ['② 运营：等级换上限', 'Fast 8 或 Fast 9，前期不 D 牌，靠利息和等级把高费卡的概率拉上来。', '适合：开局有连胜或能安稳吃连败。风险：上不去九就是纯亏，所以 4-2 之后必须算清还差多少金。'],
+  ['③ 散装：八条二档', '不堆大羁绊，把八条羁绊的第一档一次买齐，用八份小属性叠成一个没有短板的整体。', '适合：版本砍得凶、四费单核容易被打崩的时候。风险：上限不如大羁绊，吃鸡要靠对手失误。']
+];
+
+const STAGES = [
+  ['1 阶段', '装备散件 + 有没有二星', '2-1 前至少两个二星；抢装按阵容的三件套倒推，别见什么拿什么。'],
+  ['2 阶段', '连胜/连败 + 金币', '目标：2-5 前攒到 30 金以上，或者确认自己在走连胜。这时候 D 牌基本等于自杀。'],
+  ['3 阶段', '等级是否跟上', '3-2 上 6，3-5 到 4-1 上 7。还在 5 级说明经济节奏断了，赶紧补。'],
+  ['4 阶段', '血量 + 主 C 来了几张', '血 40 以上能再等一回合；血 30 以下立即动手。主 C 一张都没有，考虑转线。'],
+  ['5 阶段', '能不能上九 / 阵容成型没', '九五阵容 5-1 必须上九开搜。上不去就降级到 8 人口保前四，别硬撑。'],
+  ['6 阶段以后', '对手还剩几家、谁在抢你的牌', '看计分板对位，躲开克制关系摆站位。这时候钱的意义只剩"补二星"。']
+];
+
+const GIVEUPS = [
+  ['两张关键四费都只有一张', '四阶段搜完 30 金，主 C 和主坦各一张——这不是运气差，是牌池里有人在拿。立刻找同费用的替代 C，或者把装备转给场上已有的二星。'],
+  ['血线掉到 20 以下还没有成型', '别追三星了。这时候唯一目标是保前四，把钱全砸在"把场上每个位置都换成二星"，而不是赌一张三星翻盘。'],
+  ['两家以上同行', '同费用的卡池是共享的，两家抢等于你们的概率都砍半。要么先撤（转同装备的其他 C），要么比谁先放弃——通常先放弃的那个第 5，硬撑的两个第 7、第 8。'],
+  ['关键装备两件都做不出来', '散件不给你就是不给你。这时候别硬等第三件，把已有装备集中在一个人身上，让其他人当纯挂件，胜过四个人各穿一件半成品。'],
+  ['上九差 40 金以上，且血低于 35', '数学上不成立。上九需要钱，钱需要回合，回合需要血量——你三样都不够。老老实实留在 8 人口打质量，能进前四就是赢。']
+];
+
+/* ===== 渲染阵容库 ===== */
+const $ = id => document.getElementById(id);
+let curComp = 0;
+
+$('compList').innerHTML = COMPS.map((c,i)=>`
+  <div class="compitem ${i===0?'on':''}" data-i="${i}">
+    <span class="rank">${i+1}</span>
+    <span class="tier ${c.tier}">${c.tier}</span>
+    <span class="cname">${c.name}</span>
+    <span class="cmeta">${c.avg ? c.avg.toFixed(2) : '—'}</span>
+  </div>
+`).join('');
+
+function renderDetail(i){
+  const c = COMPS[i];
+  const stats = [];
+  if(c.avg) stats.push(`<span class="stat"><b class="gold">${c.avg.toFixed(2)}</b>平均名次</span>`);
+  if(c.top4) stats.push(`<span class="stat"><b class="teal">${c.top4}%</b>前四率</span>`);
+  if(c.win) stats.push(`<span class="stat"><b class="red">${c.win}%</b>吃鸡率</span>`);
+  if(c.games) stats.push(`<span class="stat"><b>${c.games.toLocaleString()}</b>局样本</span>`);
+  if(c.pick) stats.push(`<span class="stat"><b>${c.pick}%</b>选取率</span>`);
+
+  const units = c.units.map(u=>`
+    <tr>
+      <td><span class="cost c${u.c}">${u.c}</span>${u.n}</td>
+      <td><span class="role ${u.role.includes('主')?'main':''}">${u.role}</span></td>
+      <td class="items">${u.items.join(' · ')}</td>
+    </tr>`).join('');
+
+  const traits = c.traits.map(([n,v])=>`<span class="tr">${n}<b>${v}</b></span>`).join('');
+
+  $('compDetail').innerHTML = `
+    <div class="dhead">
+      <span class="tier ${c.tier}" style="width:34px;height:34px;font-size:13px">${c.tier}</span>
+      <div style="flex:1">
+        <h3>${c.name}</h3>
+        <div style="font-size:12px;color:var(--dim)">${c.pop} · ${c.style}</div>
+        <div class="statrow">${stats.join('')}</div>
+      </div>
+    </div>
+
+    <div class="codebox">
+      <span>${c.code}</span>
+      <button onclick="copyCode('${c.code.replace(/'/g,"\\'")}', this)">复制</button>
+    </div>
+
+    <div class="traits">${traits}</div>
+
+    <table>
+      <thead><tr><th style="width:32%">棋子</th><th style="width:20%">定位</th><th>装备</th></tr></thead>
+      <tbody>${units}</tbody>
+    </table>
+
+    <div class="blk"><h4>怎么打（运营节奏）</h4><p>${c.flow}</p></div>
+    <div class="blk"><h4>站位</h4><p>${c.pos}</p></div>
+
+    <div class="blk"><h4>海克斯怎么选</h4>
+      ${c.aug.top?.length ? `<div style="margin-bottom:5px"><span style="font-size:11.5px;color:var(--faint)">优先：</span>${c.aug.top.map(a=>`<span class="pill">${a}</span>`).join('')}</div>` : ''}
+      ${c.aug.ok?.length ? `<div style="margin-bottom:5px"><span style="font-size:11.5px;color:var(--faint)">备选：</span>${c.aug.ok.map(a=>`<span class="pill mid">${a}</span>`).join('')}</div>` : ''}
+      ${c.aug.bad?.length ? `<div><span style="font-size:11.5px;color:var(--faint)">避开：</span>${c.aug.bad.map(a=>`<span class="pill bad">${a}</span>`).join('')}</div>` : ''}
+    </div>
+
+    <div class="blk"><h4>什么时候放弃</h4>
+      <div class="adv warn"><span class="ico">⚠️</span><div>${c.giveUp}</div></div>
+    </div>
+
+    <div class="blk"><h4>新手最容易犯的错</h4>
+      ${c.mistakes.map(m=>`<div class="adv danger"><span class="ico">✕</span><div>${m}</div></div>`).join('')}
+    </div>
+
+    ${c.note ? `<div class="blk"><h4>一句话理解这套</h4><p style="color:var(--dim)">${c.note}</p></div>` : ''}
+  `;
+}
+function copyCode(txt, btn){
+  navigator.clipboard.writeText(txt).then(()=>{
+    btn.textContent = '已复制';
+    setTimeout(()=>btn.textContent='复制', 1500);
+  }).catch(()=>{ btn.textContent = '手动复制'; });
+}
+document.querySelectorAll('.compitem').forEach(el=>{
+  el.addEventListener('click', ()=>{
+    document.querySelectorAll('.compitem').forEach(x=>x.classList.remove('on'));
+    el.classList.add('on');
+    renderDetail(parseInt(el.dataset.i));
+  });
+});
+renderDetail(0);
+
+/* ===== 渲染海克斯/决策 ===== */
+$('fixBody').innerHTML = FIXES.map(([a,b,c])=>`<tr><td><b>${a}</b></td><td style="color:var(--dim)">${b}</td><td>${c}</td></tr>`).join('');
+$('augGrid').innerHTML = AUGS.map(a=>`
+  <div class="aug ${a.top?'top':''}">
+    <div class="nm">${a.nm}</div>
+    <div class="ty">${a.ty}</div>
+    <div class="ds">${a.ds}</div>
+    <div class="use">→ ${a.use}</div>
+  </div>`).join('');
+$('emblemList').innerHTML = EMBLEMS.map(([t,k,d])=>
+  `<div class="adv ${k==='good'?'good':'danger'}"><span class="ico">${k==='good'?'✓':'✕'}</span><div><b>${t}</b><div class="t">${d}</div></div></div>`
+).join('');
+$('winPlans').innerHTML = PLANS.map(([t,d,x],i)=>
+  `<div class="step"><div class="num">${i+1}</div><div class="bd"><b>${t}</b><span>${d}<br><span style="color:var(--faint);font-size:11.5px">${x}</span></span></div></div>`
+).join('');
+$('stageBody').innerHTML = STAGES.map(([a,b,c])=>`<tr><td><b>${a}</b></td><td style="color:var(--dim)">${b}</td><td>${c}</td></tr>`).join('');
+$('giveUpList').innerHTML = GIVEUPS.map(([t,d])=>
+  `<div class="adv warn"><span class="ico">⚠️</span><div><b>${t}</b><div class="t">${d}</div></div></div>`
+).join('');
+
+/* ===== Tab ===== */
+document.querySelectorAll('nav button').forEach(b=>{
+  b.addEventListener('click', ()=>{
+    document.querySelectorAll('nav button').forEach(x=>x.classList.remove('on'));
+    document.querySelectorAll('section').forEach(x=>x.classList.remove('on'));
+    b.classList.add('on');
+    $('tab-'+b.dataset.tab).classList.add('on');
+  });
+});
+
+/* =========================================================
+   经济规划器
+   ========================================================= */
+const XP_NEED = {1:2, 2:2, 3:6, 4:10, 5:20, 6:36, 7:56, 8:64, 9:64};
+const MAX_LEVEL = 10, XP_PER_ROUND = 2, XP_PRICE = 4, XP_PER_BUY = 4, INTEREST_CAP = 5;
+const STAGE_DMG = {1:0, 2:2, 3:6, 4:7, 5:10, 6:12, 7:12, 8:12, 9:14};
+
+const num = el => Math.max(0, parseInt(el.value) || 0);
+function parseRound(s){
+  const m = String(s).trim().match(/^(\d+)\s*[-－]\s*(\d+)$/);
+  return m ? {s:+m[1], r:+m[2]} : {s:4, r:1};
+}
+function nextRound(rt){
+  const last = rt.s === 1 ? 4 : 7;
+  return rt.r < last ? {s:rt.s, r:rt.r+1} : {s:rt.s+1, r:1};
+}
+function baseGold(rt){
+  if(rt.s === 1) return {1:2,2:2,3:2,4:3}[rt.r] ?? 2;
+  if(rt.s === 2 && rt.r === 1) return 4;
+  return 5;
+}
+const interestOf = g => Math.min(INTEREST_CAP, Math.floor(g/10));
+function streakGold(st){
+  const n = Math.abs(st);
+  if(n >= 6) return 3; if(n === 5) return 2; if(n >= 2) return 1; return 0;
+}
+function totalXpTo(lv){ let s=0; for(let l=1;l<lv;l++) s += (XP_NEED[l]||0); return s; }
+
+(function initEcon(){
+  const lvSel = $('level'), tgSel = $('target');
+  for(let i=1;i<=MAX_LEVEL;i++){
+    lvSel.insertAdjacentHTML('beforeend', `<option value="${i}">Lv.${i}</option>`);
+    tgSel.insertAdjacentHTML('beforeend', `<option value="${i}">Lv.${i}</option>`);
+  }
+  lvSel.value = 7; tgSel.value = 8;
+  const p = $('paramXP');
+  for(let l=1;l<=9;l++)
+    p.insertAdjacentHTML('beforeend', `<div class="p"><span>Lv.${l}→${l+1}</span><input type="number" data-lv="${l}" value="${XP_NEED[l]}"></div>`);
+})();
+
+function calcEcon(){
+  const rt = parseRound($('round').value);
+  const hp = num($('hp')), level = +$('level').value, xp = num($('xp'));
+  const gold = num($('gold')), streak = +$('streak').value, target = +$('target').value, spend = num($('spend'));
+
+  const goldAfter = Math.max(0, gold - spend);
+  const base = baseGold(rt), iBefore = interestOf(gold), interest = interestOf(goldAfter);
+  const sg = streakGold(streak), income = base + interest + sg + 1;
+
+  const curTier = Math.floor(gold/10), dead = gold % 10, nextNeed = (curTier+1)*10 - gold;
+
+  $('intbar').innerHTML = [10,20,30,40,50].map((g,i)=>{
+    const on = gold >= g ? 'on' : '';
+    return `<div class="seg ${on}"><span>${i+1} 金</span><span style="font-size:9.5px;opacity:.7">${g}+</span></div>`;
+  }).join('');
+
+  let ih = '';
+  if(gold >= 50) ih = `已满利息（5 金/回合）。<b style="color:var(--gold)">结算后 ${gold-50} 金是纯闲置</b>，一分利息都不多给，优先上人口或 D 质量。`;
+  else if(gold >= 10) ih = `还差 <b style="color:var(--gold)">${nextNeed} 金</b>升到 ${curTier+1} 金档。当前 ${gold} 金里有 <b style="color:var(--gold)">${dead} 金是死钱</b>——不凑整等于白放。`;
+  else ih = `还没到 10 金，没有利息。`;
+  $('intHint').innerHTML = ih;
+
+  $('kIncome').textContent = '+' + income;
+  $('kIncomeDetail').textContent = `基础 ${base} + 利息 ${interest} + 连胜 ${sg} + 胜场 1`;
+  $('kNext').textContent = (goldAfter + income) + ' 金';
+  $('kNextDetail').textContent = spend > 0 ? `花了 ${spend}，利息 -${iBefore - interest}` : '不花钱，含本回合全部收入';
+
+  const needXp = totalXpTo(target) - totalXpTo(level) - xp;
+  const xpGold = Math.max(0, Math.ceil(needXp / XP_PER_BUY) * XP_PRICE);
+  $('kTgt').textContent = target;
+  if(target <= level){ $('kXpGold').textContent = '已达成'; $('kXpDetail').textContent = `当前 Lv.${level}`; }
+  else {
+    $('kXpGold').textContent = xpGold + ' 金';
+    $('kXpDetail').textContent = `需 ${needXp} 经验｜纯自然升级 ${Math.ceil(needXp/XP_PER_ROUND)} 回合`;
+  }
+
+  let rows = '', g = goldAfter, cur = rt, cl = level, cx = xp;
+  for(let i=0;i<8;i++){
+    const b = baseGold(cur), it = interestOf(g), s = streakGold(streak), inc = b + it + s + 1;
+    const per = (STAGE_DMG[cur.s] ?? 12) + 5;
+    const survive = per > 0 ? Math.floor(hp/per) : 99;
+    rows += `<tr class="${i===0?'hl':''}">
+      <td>${cur.s}-${cur.r}</td><td>Lv.${cl}</td><td>${g}</td>
+      <td class="up">+${inc}</td><td>+${it}</td><td>+${s}</td>
+      <td>${survive <= 1 ? '<span class="down">1 次</span>' : survive + ' 次'}</td></tr>`;
+    g += inc; cx += XP_PER_ROUND;
+    while(cl < MAX_LEVEL && cx >= (XP_NEED[cl]||0)){ cx -= (XP_NEED[cl]||0); cl++; }
+    cur = nextRound(cur);
+  }
+  $('simBody').innerHTML = rows;
+
+  const adv = [];
+  const per = (STAGE_DMG[rt.s] ?? 12) + 5;
+  const lives = per > 0 ? Math.floor(hp/per) : 99;
+
+  if(lives <= 1) adv.push(['danger','⛔',`只剩 ${lives} 次容错，别再存钱`,`按当前阶段每次战败约扣 ${per} 血，${hp} 血扛不了两下。钱现在不花，等于带进棺材。`]);
+  else if(lives === 2) adv.push(['warn','⚠️',`容错只剩 ${lives} 次`,`可以再观察一回合，但下一回合必须完成花钱动作。`]);
+
+  if(gold >= 50) adv.push(['warn','💰',`已满利息，${gold-50} 金是闲钱`,`超过 50 的部分一分利息都不多给。优先上人口，或者 D 质量。`]);
+  else if(gold >= 20 && dead > 0 && dead <= 3) adv.push(['warn','🪙',`${dead} 金死钱，凑个整`,`利息按 10 取整，${gold} 金和 ${gold-dead} 金收益完全一样。把这 ${dead} 金花掉，或卖备战席边角料补到 ${(curTier+1)*10}。`]);
+
+  if(rt.s >= 4 && level <= 7 && gold >= 40) adv.push(['good','⬆️',`${rt.s}-${rt.r} 还在 Lv.${level}，该上 8 了`,`四费主 C 在 7 级的出现率远低于 8 级。钱握着但等级不够，等于用最贵的方式找牌。`]);
+
+  if(target > level){
+    if(xpGold <= gold){
+      const left = gold - xpGold;
+      adv.push(['good','✅',`升 Lv.${target} 的钱够了，买完还剩 ${left} 金`,`升完利息档位变为 ${interestOf(left)}，${left >= 50 ? '仍保持满利息' : `每回合少 ${iBefore - interestOf(left)} 金`}。`]);
+    } else {
+      const gap = xpGold - gold;
+      adv.push(['warn','📉',`升 Lv.${target} 还差 ${gap} 金`,`按当前收入约 ${Math.ceil(gap/Math.max(1,income))} 回合能凑够（不被打断的前提下）。`]);
+    }
+  }
+  if(spend > 0 && iBefore - interest > 0) adv.push(['warn','🧾',`这 ${spend} 金花下去，利息掉 ${iBefore-interest} 金/回合`,`如果它买不到能赢的战力，就是纯亏。要花就花到能保住连胜或止住掉血。`]);
+  if(!adv.length) adv.push(['good','👍','局面没什么毛病，按计划走',`保持 ${gold} 金吃 ${iBefore} 利息，等下个决策点。`]);
+
+  $('advice').innerHTML = adv.map(([cls,ico,t,x])=>
+    `<div class="adv ${cls}"><span class="ico">${ico}</span><div><b>${t}</b><div class="t">${x}</div></div></div>`).join('');
+}
+
+document.querySelectorAll('#tab-econ input, #tab-econ select').forEach(el=>{
+  el.addEventListener('input', calcEcon); el.addEventListener('change', calcEcon);
+});
+document.querySelectorAll('#paramXP input').forEach(inp=>{
+  inp.addEventListener('input', ()=>{
+    XP_NEED[+inp.dataset.lv] = Math.max(0, parseInt(inp.value)||0); calcEcon();
+  });
+});
+calcEcon();
+</script>
+<script src="install.js"></script>
+</body>
+</html>
