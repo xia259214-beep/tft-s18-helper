@@ -1,0 +1,2307 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<script src="nav.js"></script><script src="i18n.js"></script><meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<link rel="manifest" href="app-manifest.json?v=3">
+<meta name="theme-color" content="#0d1117">
+<link rel="icon" type="image/png" href="app-icon-192.png">
+
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon-180.png">
+<link rel="apple-touch-icon" sizes="167x167" href="apple-touch-icon-167.png">
+<link rel="apple-touch-icon" sizes="152x152" href="apple-touch-icon-152.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="云顶助手">
+
+<link rel="shortcut icon" href="app-icon.ico">
+<meta property="og:title" content="云顶作战台 · S18 自然之力">
+<meta property="og:description" content="云顶助手 · S18 自然之力：开局引导 / 阵容棋盘 / 海克斯 / 经济规划">
+<meta property="og:image" content="https://tft-s18-helper.app.workbuddy.host/app-icon-512.png">
+<meta property="og:image:width" content="512">
+<meta property="og:image:height" content="512">
+<meta property="og:type" content="website">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>云顶作战台 · S18 自然之力</title>
+<style>
+  :root{
+    --bg:#080b12; --panel:#111825; --panel2:#182133; --panel3:#202c40;
+    --line:rgba(255,255,255,.07);
+    --gold:#f5b942; --teal:#4dd4c0; --red:#ff6b6b; --blue:#5aa9ff; --purple:#a78bfa; --green:#5ec269;
+    --txt:#e9eef7; --dim:#8b98ad; --faint:#5d6b80;
+    --c1:#8b98ad; --c2:#5ec269; --c3:#5aa9ff; --c4:#a78bfa; --c5:#f5b942;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    background:radial-gradient(1000px 480px at 78% -6%, #17253c 0%, #080b12 60%);
+    color:var(--txt); font-family:"Microsoft YaHei","PingFang SC",system-ui,sans-serif;
+    min-height:100vh; padding:18px 16px 60px; font-size:13.5px; line-height:1.6;
+  }
+  .wrap{max-width:1280px; margin:0 auto;}
+  header{display:flex; align-items:center; gap:12px; margin-bottom:14px; flex-wrap:wrap;}
+  h1{font-size:20px; font-weight:600;}
+  h1 em{color:var(--gold); font-style:normal;}
+  .ver{font-size:11px; color:var(--faint); padding:2px 8px; border:1px solid var(--line); border-radius:20px;}
+  .tip{font-size:11.5px; color:var(--faint); margin-left:auto;}
+
+  /* 顶部模式切换 */
+  .tabs{display:flex; gap:6px; background:var(--panel); border:1px solid var(--line); border-radius:11px; padding:4px; margin-bottom:16px; width:fit-content;}
+  .tabs button{
+    background:none; border:none; color:var(--dim); font-family:inherit; font-size:13px;
+    padding:7px 18px; border-radius:8px; cursor:pointer; transition:.15s; font-weight:500;
+  }
+  .tabs button:hover{color:var(--txt);}
+  .tabs button.on{background:linear-gradient(160deg,rgba(245,185,66,.18),rgba(245,185,66,.06)); color:var(--gold); box-shadow:inset 0 0 0 1px rgba(245,185,66,.28);}
+  .tabs .badge{font-size:10px; opacity:.75; margin-left:4px;}
+  section.tab{display:none;}
+  section.tab.on{display:block; animation:fadein .28s ease;}
+  @keyframes fadein{from{opacity:0; transform:translateY(6px)} to{opacity:1; transform:none}}
+
+  /* 阵容选择条 */
+  .selector{display:flex; gap:9px; overflow-x:auto; padding-bottom:8px; margin-bottom:16px; scrollbar-width:thin;}
+  .selcard{
+    flex-shrink:0; width:106px; background:var(--panel); border:1px solid var(--line); border-radius:12px;
+    padding:10px 7px; cursor:pointer; transition:.16s; text-align:center; position:relative; overflow:hidden;
+  }
+  .selcard:hover{border-color:rgba(245,185,66,.4); transform:translateY(-2px);}
+  .selcard.on{border-color:var(--gold); background:linear-gradient(170deg,rgba(245,185,66,.12),var(--panel2));}
+  .selcard .av{width:42px; height:42px; border-radius:50%; margin:0 auto 6px; border:2px solid var(--c4); display:block; object-fit:cover;}
+  .selcard .nm{font-size:11.5px; font-weight:600; line-height:1.3; margin-bottom:3px; min-height:30px;}
+  .selcard .mt{font-size:10px; color:var(--faint);}
+  .selcard .bd{position:absolute; top:0; right:0; font-size:9.5px; font-weight:700; padding:1px 6px;
+    border-bottom-left-radius:7px; background:var(--gold); color:#151a24;}
+  .selcard .bd.A{background:var(--blue); color:#0a1524;}
+  .selcard .bd.B{background:var(--faint); color:#0a1524;}
+  .selcard .bd.C{background:#5a6070; color:#e8edf5;}
+
+  /* 强度榜表格 */
+  .stattable{width:100%; border-collapse:collapse; font-size:12.5px; min-width:460px;}
+  .stattable th{font-size:10.5px; color:var(--faint); text-align:left; padding:5px 8px; letter-spacing:.5px; font-weight:600; white-space:nowrap;}
+  .stattable td{padding:7px 8px; border-top:1px solid var(--line); white-space:nowrap;}
+  .stattable th:not(:first-child), .stattable td:not(:first-child){text-align:right;}
+  .stattable td:first-child, .stattable th:first-child{text-align:left;}
+  .stattable tbody tr{cursor:pointer; transition:background .15s;}
+  .stattable tbody tr:hover{background:rgba(212,165,66,.08);}
+  .stattable .rk{color:var(--faint); font-size:11px;}
+  .tierchip{display:inline-block; min-width:18px; text-align:center; border-radius:5px; font-weight:700; font-size:10px; padding:2px 5px;}
+  .tierchip.S{background:var(--gold); color:#151a24;}
+  .tierchip.A{background:var(--blue); color:#0a1524;}
+  .tierchip.B{background:var(--faint); color:#0a1524;}
+  .tierchip.C{background:#5a6070; color:#e8edf5;}
+  .stattable .dash{color:var(--faint);}
+  @media (max-width:520px){
+    .stattable{min-width:0; font-size:11.5px;}
+    .stattable th{font-size:9.5px; padding:4px 4px;}
+    .stattable td{padding:6px 4px;}
+    .stattable .col-games{display:none;}
+  }
+
+  /* 主体 */
+  .main{display:grid; grid-template-columns:1fr 340px; gap:15px; align-items:start;}
+  @media(max-width:1000px){ .main{grid-template-columns:1fr;} }
+  .card{background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:16px;}
+  .card h2{font-size:11.5px; font-weight:600; color:var(--dim); letter-spacing:1.4px; margin-bottom:12px; text-transform:uppercase;}
+  .card h2 .sub{color:var(--faint); letter-spacing:0; text-transform:none; font-weight:400; margin-left:6px;}
+
+  /* ============ 开局引导 ============ */
+  .guide{display:grid; grid-template-columns:1fr 372px; gap:15px; align-items:start;}
+  @media(max-width:1000px){ .guide{grid-template-columns:1fr;} }
+
+  .handbox{min-height:78px; background:var(--panel2); border:1px dashed rgba(245,185,66,.25);
+    border-radius:11px; padding:10px; display:flex; gap:9px; flex-wrap:wrap; align-items:center;}
+  .handbox .empty{color:var(--faint); font-size:12px; padding:12px 6px;}
+  .hchip{position:relative; text-align:center; cursor:pointer; width:56px;}
+  .hchip img,.hchip .ph{width:46px; height:46px; border-radius:50%; object-fit:cover; border:2px solid var(--c4); display:block; margin:0 auto;}
+  .hchip .ph{display:flex; align-items:center; justify-content:center; font-size:16px; font-weight:700; color:#cbd6e6; background:var(--panel3);}
+  .hchip .hn{font-size:10px; color:var(--dim); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .hchip .x{position:absolute; top:-4px; right:2px; width:15px; height:15px; border-radius:50%;
+    background:var(--red); color:#fff; font-size:10px; line-height:15px; text-align:center; opacity:0; transition:.15s;}
+  .hchip:hover .x{opacity:1;}
+  .hchip:hover img,.hchip:hover .ph{filter:grayscale(.6) brightness(.75);}
+
+  .poolgroup{margin-bottom:12px;}
+  .poolgroup .gl{font-size:11px; color:var(--faint); margin-bottom:6px; display:flex; align-items:center; gap:6px;}
+  .poolgroup .gl i{display:inline-block; width:7px; height:7px; border-radius:50%;}
+  .poolgrid{display:flex; gap:7px; flex-wrap:wrap;}
+  .pchip{width:52px; text-align:center; cursor:pointer; opacity:.62; transition:.15s; position:relative;}
+  .pchip:hover{opacity:1; transform:translateY(-2px);}
+  .pchip img,.pchip .ph{width:42px; height:42px; border-radius:50%; object-fit:cover; border:2px solid var(--c1); display:block; margin:0 auto;}
+  .pchip .ph{display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:700; color:#cbd6e6; background:var(--panel3);}
+  .pchip .pn{font-size:9.5px; color:var(--dim); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .pchip.picked{opacity:1;}
+  .pchip.nowork{opacity:.3; filter:grayscale(.7);}
+  .pchip.nowork:hover{opacity:.75; filter:none;}
+  .pchip.picked img,.pchip.picked .ph{box-shadow:0 0 0 2px var(--gold), 0 0 12px rgba(245,185,66,.45);}
+  .pchip.picked::after{content:'✓'; position:absolute; top:-3px; right:-1px; width:14px; height:14px; border-radius:50%;
+    background:var(--gold); color:#12161f; font-size:9.5px; line-height:14px; font-weight:700;}
+
+  /* 推荐结果 */
+  .adv{border:1px solid var(--line); border-radius:12px; padding:13px; margin-bottom:11px; background:var(--panel2); position:relative; overflow:hidden;}
+  .adv.top{border-color:rgba(245,185,66,.42); background:linear-gradient(160deg,rgba(245,185,66,.10),var(--panel2));}
+  .adv .rank{position:absolute; top:0; left:0; font-size:10px; font-weight:700; padding:2px 8px;
+    border-bottom-right-radius:8px; background:var(--panel3); color:var(--dim);}
+  .adv.top .rank{background:var(--gold); color:#151a24;}
+  .advhead{display:flex; align-items:center; gap:10px; margin:6px 0 8px;}
+  .advhead img,.advhead .ph{width:40px; height:40px; border-radius:50%; border:2px solid var(--c4); object-fit:cover; flex-shrink:0;}
+  .advhead .ph{display:flex; align-items:center; justify-content:center; font-size:15px; font-weight:700; background:var(--panel3);}
+  .advhead .t{flex:1; min-width:0;}
+  .advhead .t b{font-size:14px; display:block;}
+  .advhead .t span{font-size:10.5px; color:var(--faint);}
+  .verdict{font-size:10.5px; font-weight:700; padding:2px 8px; border-radius:20px; white-space:nowrap;}
+  .verdict.hi{background:rgba(245,185,66,.16); color:var(--gold); border:1px solid rgba(245,185,66,.4);}
+  .verdict.mid{background:rgba(77,212,192,.12); color:var(--teal); border:1px solid rgba(77,212,192,.34);}
+  .verdict.low{background:rgba(139,152,173,.12); color:var(--dim); border:1px solid var(--line);}
+  .meter{height:5px; border-radius:3px; background:var(--panel3); overflow:hidden; margin-bottom:9px;}
+  .meter i{display:block; height:100%; border-radius:3px; background:linear-gradient(90deg,#33b3a0,#7fe6d8); transition:width .4s;}
+  .adv.top .meter i{background:linear-gradient(90deg,#e0a01f,#ffd782);}
+  .advwhy{font-size:12px; color:#b9c4d4; line-height:1.75;}
+  .advwhy b{color:var(--gold); font-weight:600;}
+  .advwhy .miss b{color:var(--red);}
+  .advwhy .line{display:block; margin-top:5px;}
+  .advwhy .lbl{color:var(--faint); font-size:11px; margin-right:4px;}
+  .advbtn{margin-top:10px; width:100%; background:rgba(245,185,66,.13); border:1px solid rgba(245,185,66,.35);
+    color:var(--gold); border-radius:8px; padding:7px; font-size:12px; cursor:pointer; font-family:inherit; transition:.15s;}
+  .advbtn:hover{background:rgba(245,185,66,.24);}
+
+  .hint{font-size:11.5px; color:var(--faint); line-height:1.7; margin-top:10px; padding-top:10px; border-top:1px solid var(--line);}
+
+  /* ============ 棋盘 ============ */
+  .board{
+    background:radial-gradient(circle at 50% 0%, rgba(90,169,255,.07), transparent 62%), linear-gradient(180deg, #0d1524, #0a1018);
+    border:1px solid var(--line); border-radius:14px; padding:22px 16px 16px; position:relative;
+  }
+  .zone{display:flex; justify-content:center; gap:14px; flex-wrap:wrap;}
+  .zone.front{margin-bottom:26px; position:relative;}
+  .zone.front::after{
+    content:''; position:absolute; left:8%; right:8%; bottom:-14px; height:1px;
+    background:linear-gradient(90deg, transparent, rgba(245,185,66,.22), transparent);
+  }
+  .zlabel{position:absolute; left:10px; top:-2px; font-size:10px; color:#3f4c60; letter-spacing:2px;}
+  .boardsum{
+    display:flex; justify-content:center; align-items:center; gap:7px; flex-wrap:wrap;
+    font-size:12px; color:var(--dim); margin:-4px 0 18px; padding-bottom:12px;
+    border-bottom:1px dashed rgba(255,255,255,.07);
+  }
+  .boardsum b{color:var(--txt); font-size:13.5px; font-variant-numeric:tabular-nums;}
+  .boardsum b.ok{color:var(--teal);}
+  .boardsum b.warn{color:var(--gold);}
+  .boardsum .dot{color:#3a4457;}
+  .boardsum .hint{color:#5a6578;}
+  @media (max-width:520px){ .boardsum .hint{display:none;} }
+
+  .slot{width:84px; text-align:center; position:relative; transition:.18s; cursor:pointer;}
+  .slot:hover{transform:translateY(-3px);}
+  .slot:hover .avwrap::after{content:'点我标记缺牌'; position:absolute; bottom:-19px; left:50%; transform:translateX(-50%);
+    font-size:9px; color:var(--faint); white-space:nowrap;}
+  .avwrap{position:relative; width:70px; height:70px; margin:0 auto;}
+  .avwrap img, .avwrap .ph{
+    width:70px; height:70px; border-radius:50%; object-fit:cover; display:block;
+    border:2.5px solid var(--c1); background:var(--panel3);
+  }
+  .avwrap .ph{display:flex; align-items:center; justify-content:center; font-size:22px; font-weight:700; color:#cbd6e6;}
+  .slot[data-cost="1"] .avwrap img,.slot[data-cost="1"] .avwrap .ph{border-color:var(--c1);}
+  .slot[data-cost="2"] .avwrap img,.slot[data-cost="2"] .avwrap .ph{border-color:var(--c2);}
+  .slot[data-cost="3"] .avwrap img,.slot[data-cost="3"] .avwrap .ph{border-color:var(--c3);}
+  .slot[data-cost="4"] .avwrap img,.slot[data-cost="4"] .avwrap .ph{border-color:var(--c4);}
+  .slot[data-cost="5"] .avwrap img,.slot[data-cost="5"] .avwrap .ph{border-color:var(--c5);}
+  .slot.carry .avwrap::before{
+    content:''; position:absolute; inset:-7px; border-radius:50%;
+    background:radial-gradient(circle, rgba(245,185,66,.28), transparent 68%);
+    animation:pulse 2.4s ease-in-out infinite;
+  }
+  @keyframes pulse{0%,100%{opacity:.55; transform:scale(1)} 50%{opacity:1; transform:scale(1.08)}}
+  .crown{position:absolute; top:-11px; left:50%; transform:translateX(-50%); font-size:15px; z-index:3; filter:drop-shadow(0 0 5px rgba(245,185,66,.7));}
+  .costtag{
+    position:absolute; bottom:-2px; right:-2px; width:20px; height:20px; border-radius:50%;
+    background:var(--panel); border:1.5px solid var(--c1); font-size:10.5px; font-weight:700;
+    display:flex; align-items:center; justify-content:center; z-index:3;
+  }
+  .slot[data-cost="1"] .costtag{border-color:var(--c1); color:var(--c1);}
+  .slot[data-cost="2"] .costtag{border-color:var(--c2); color:var(--c2);}
+  .slot[data-cost="3"] .costtag{border-color:var(--c3); color:var(--c3);}
+  .slot[data-cost="4"] .costtag{border-color:var(--c4); color:var(--c4);}
+  .slot[data-cost="5"] .costtag{border-color:var(--c5); color:var(--c5);}
+  .uname{font-size:11.5px; margin-top:5px; color:#c3ccdb; line-height:1.3; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .slot.carry .uname{color:var(--gold); font-weight:600;}
+
+  .items{display:flex; gap:3px; justify-content:center; margin-top:4px; min-height:16px;}
+
+  /* 星级标记 */
+  .stars{display:flex; gap:2px; justify-content:center; margin-top:4px; line-height:1;}
+  .stars i{
+    font-style:normal; font-size:12px; color:#333c4b; cursor:pointer;
+    padding:2px 1px; user-select:none; -webkit-user-select:none; transition:color .12s;
+  }
+  .stars i.tgt{color:#6b5528;}
+  .stars i.on{color:#ffd76a; text-shadow:0 0 7px rgba(255,205,70,.8);}
+  .stars i:active{transform:scale(1.25);}
+  .needtag{font-size:9.5px; color:#d68f2a; margin-top:3px; line-height:1.2; letter-spacing:.2px;}
+  .slot.ok3 .avwrap img, .slot.ok3 .avwrap .ph{border-color:#ffd76a; box-shadow:0 0 12px rgba(255,205,70,.55);}
+
+  .it{
+    width:15px; height:15px; border-radius:3.5px; font-size:8.5px; font-weight:700;
+    display:flex; align-items:center; justify-content:center; color:#0b1119; cursor:help;
+  }
+  .it.ad{background:linear-gradient(150deg,#ff9b8a,#e8604f);}
+  .it.ap{background:linear-gradient(150deg,#c4a6ff,#8b63e8);}
+  .it.def{background:linear-gradient(150deg,#8cc4ff,#4b86d6);}
+  .it.util{background:linear-gradient(150deg,#7fe6d8,#33b3a0);}
+  .it.emblem{background:linear-gradient(150deg,#ffd782,#e0a01f);}
+  .itimg{width:100%; height:100%; object-fit:cover; border-radius:inherit; display:block; pointer-events:none;}
+
+  /* 阵容过渡 */
+  .stagerow{display:flex; align-items:flex-start; gap:10px; padding:10px 0; border-bottom:1px dashed var(--line);}
+  .stagerow:last-child{border-bottom:none; padding-bottom:2px;}
+  .stagewrap{flex:0 0 78px; text-align:center;}
+  .stagetag{padding:4px 0; border-radius:7px; font-size:11.5px; font-weight:700; color:#0e1420;}
+  .stagetag.e{background:linear-gradient(150deg,#9be7a8,#4fae66);}
+  .stagetag.m{background:linear-gradient(150deg,#ffd782,#e0a01f);}
+  .stagetag.l{background:linear-gradient(150deg,#c4a6ff,#8b63e8);}
+  .stagewhen{font-size:9.5px; color:var(--faint); margin-top:3px;}
+  .stageunits{display:flex; flex-wrap:wrap; gap:7px; flex:1; min-width:0;}
+  .savatar{width:40px; min-width:40px;}
+  .savatar img, .savatar .ph{width:38px; height:38px; border-radius:9px; border:2px solid; object-fit:cover; background:#0a0f1a;}
+  .savatar .ph{align-items:center; justify-content:center; font-size:15px; font-weight:700; color:#cfd8e6;}
+  .savatar .sn{font-size:9.5px; color:var(--dim); margin-top:2px; text-align:center; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .stagenote{font-size:10.5px; color:var(--faint); line-height:1.6; margin-top:4px; flex-basis:100%; padding-left:2px;}
+  .stageplan{flex-basis:100%; display:flex; flex-direction:column; gap:5px; margin-top:7px;}
+  .pl{display:flex; align-items:flex-start; gap:6px; font-size:11px; line-height:1.6; color:var(--dim);}
+  .pl b{color:var(--txt); font-weight:600;}
+  .pl .k{flex:0 0 auto; padding:1px 6px; border-radius:5px; font-size:9.5px; font-weight:700; letter-spacing:.3px;}
+  .pl .k.pop{background:rgba(120,160,255,.14); color:#9fc0ff; border:1px solid rgba(120,160,255,.28);}
+  .pl .k.save{background:rgba(90,200,120,.14); color:#7fe0a1; border:1px solid rgba(90,200,120,.28);}
+  .pl .k.spend{background:rgba(230,90,80,.16); color:#ff9b8a; border:1px solid rgba(230,90,80,.3);}
+  .pl .k.eq{background:rgba(212,165,66,.14); color:var(--gold); border:1px solid rgba(212,165,66,.3);}
+  .pl .itimg{width:19px; height:19px; border-radius:4px; object-fit:cover; vertical-align:-4px; margin-right:3px;}
+  @media (max-width:520px){ .stagewrap{flex-basis:60px;} .stagetag{font-size:10.5px;} }
+
+  .slot.missed .avwrap img, .slot.missed .avwrap .ph{filter:grayscale(1) brightness(.4); border-color:#39414f;}
+  .slot.missed .uname{color:#4a5668; text-decoration:line-through;}
+  .slot.missed::after{
+    content:'缺'; position:absolute; top:22px; left:50%; transform:translateX(-50%);
+    font-size:13px; color:var(--red); font-weight:700; z-index:4; text-shadow:0 0 8px #000;
+  }
+  .slot.missed .items{opacity:.35;}
+  .slot.flash{animation:flash .55s ease;}
+  @keyframes flash{0%{transform:scale(1)} 35%{transform:scale(1.12)} 100%{transform:scale(1)}}
+
+  /* 右侧面板 */
+  .panel-block{margin-bottom:16px;}
+  .panel-block:last-child{margin-bottom:0;}
+  .carrybox{display:flex; gap:11px; align-items:center; background:var(--panel2); border-radius:10px; padding:10px 12px; border:1px solid rgba(245,185,66,.22);}
+  .carrybox img, .carrybox .ph{width:46px; height:46px; border-radius:50%; border:2px solid var(--gold); object-fit:cover; flex-shrink:0;}
+  .carrybox .ph{display:flex; align-items:center; justify-content:center; font-size:17px; font-weight:700; background:var(--panel3);}
+  .carrybox .info{flex:1; min-width:0;}
+  .carrybox .info b{font-size:13.5px; color:var(--gold); display:block;}
+  .carrybox .info span{font-size:11px; color:var(--faint);}
+
+  .traitrow{display:flex; align-items:center; gap:8px; margin-bottom:6px; font-size:12px;}
+  .traitrow .tn{width:82px; color:var(--dim); flex-shrink:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .traitrow .bar{flex:1; height:6px; border-radius:3px; background:var(--panel3); overflow:hidden;}
+  .traitrow .bar i{display:block; height:100%; border-radius:3px; transition:width .25s, background .25s;}
+  .traitrow .cnt{width:38px; text-align:right; font-variant-numeric:tabular-nums; font-size:11.5px; flex-shrink:0;}
+  .traitrow.ok .bar i{background:linear-gradient(90deg,#33b3a0,#7fe6d8);}
+  .traitrow.ok .cnt{color:var(--teal);}
+  .traitrow.broken .bar i{background:linear-gradient(90deg,#a83232,#ff6b6b);}
+  .traitrow.broken .cnt{color:var(--red);}
+  .traitrow.broken .tn{color:var(--red);}
+
+  .alert{border-radius:9px; padding:11px 13px; font-size:12.5px; margin-bottom:9px; display:flex; gap:9px; align-items:flex-start;}
+  .alert.warn{background:rgba(245,185,66,.08); border-left:3px solid var(--gold);}
+  .alert.bad{background:rgba(255,107,107,.08); border-left:3px solid var(--red);}
+  .alert.good{background:rgba(77,212,192,.07); border-left:3px solid var(--teal);}
+  .alert b{display:block; margin-bottom:2px;}
+  .alert .txt{color:var(--dim); font-size:12px; line-height:1.7;}
+
+  /* 作战助手（对话式反馈） */
+  .say{display:flex; gap:9px; animation:sayin .3s ease;}
+  @keyframes sayin{from{opacity:0; transform:translateY(-7px)} to{opacity:1; transform:none}}
+  .say .av{width:34px; height:34px; border-radius:50%; flex-shrink:0; display:flex; align-items:center; justify-content:center;
+    font-size:15px; background:linear-gradient(150deg,#2b3a52,#1a2436); border:1px solid rgba(245,185,66,.3);}
+  .say .body{flex:1; min-width:0;}
+  .say .body p{font-size:12px; color:#b9c4d4; line-height:1.75; margin-bottom:4px;}
+  .say .body p:last-child{margin-bottom:0;}
+  .say .who{font-size:10.5px; color:var(--faint); margin-bottom:5px;}
+  .say .who b{color:var(--gold); font-weight:600;}
+  .say .hl{color:var(--gold); font-weight:600;}
+  .say .bad{color:var(--red); font-weight:600;}
+  .say .ok{color:var(--teal); font-weight:600;}
+  .say .act{margin-top:8px; display:flex; gap:6px; flex-wrap:wrap;}
+  .say .act button{background:var(--panel3); border:1px solid var(--line); color:var(--dim); border-radius:6px;
+    padding:4px 9px; font-size:11px; cursor:pointer; font-family:inherit; transition:.15s;}
+  .say .act button:hover{border-color:rgba(245,185,66,.4); color:var(--gold);}
+  .say .act button.pri{background:rgba(245,185,66,.12); border-color:rgba(245,185,66,.35); color:var(--gold);}
+
+  .altlist{display:flex; flex-direction:column; gap:6px; margin-top:6px;}
+  .alt{background:var(--panel2); border-radius:8px; padding:8px 10px; font-size:12px; border:1px solid var(--line);}
+  .alt b{color:var(--teal); font-weight:600;}
+  .alt span{color:var(--faint); font-size:11.5px; display:block; margin-top:2px;}
+
+  .codebox{background:var(--panel2); border:1px dashed rgba(245,185,66,.28); border-radius:8px;
+    padding:8px 10px; font-family:ui-monospace,Consolas,monospace; font-size:10.5px; color:var(--gold);
+    word-break:break-all; display:flex; justify-content:space-between; gap:8px; align-items:center;}
+  .codebox button{background:rgba(245,185,66,.14); border:1px solid rgba(245,185,66,.32); color:var(--gold);
+    border-radius:5px; padding:3px 8px; font-size:10.5px; cursor:pointer; font-family:inherit; white-space:nowrap;}
+
+  details{margin-top:14px;}
+  summary{cursor:pointer; color:var(--dim); font-size:12px; outline:none; padding:8px 0; border-top:1px solid var(--line);}
+  summary:hover{color:var(--gold);}
+  .flowtxt{font-size:12.5px; color:#b9c4d4; line-height:1.85; padding-top:4px;}
+  .flowtxt b{color:var(--gold);}
+
+  /* toast */
+  .toast{position:fixed; top:16px; left:50%; transform:translate(-50%,-130%); z-index:99;
+    background:linear-gradient(160deg,#243147,#182133); border:1px solid rgba(245,185,66,.4);
+    border-radius:11px; padding:10px 16px; font-size:12.5px; box-shadow:0 10px 34px rgba(0,0,0,.55);
+    display:flex; align-items:center; gap:9px; transition:transform .32s cubic-bezier(.2,.9,.3,1.2); max-width:90vw;}
+  .toast.on{transform:translate(-50%,0);}
+  .toast .ic{font-size:16px;}
+  .toast b{color:var(--gold);}
+
+  .foot{margin-top:20px; font-size:10.5px; color:#46536a; line-height:1.8; border-top:1px solid var(--line); padding-top:11px;}
+  .legend{display:flex; gap:14px; flex-wrap:wrap; font-size:11px; color:var(--faint); margin-top:10px;}
+  .legend i{display:inline-block; width:10px; height:10px; border-radius:2.5px; margin-right:4px; vertical-align:-1px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>云顶<em data-i18n="bd_board">作战台</em></h1>
+    <span class="ver" data-i18n="bd_ver">S18 自然之力 · 18.5/18.6</span>
+    <span class="tip" data-i18n="bd_tip">开局不知道走什么 → 先看「开局引导」</span>
+  </header>
+
+  <div class="tabs">
+    <button data-tab="guide" class="on"><span data-i18n="tab_guide">开局引导</span> <span class="badge" data-i18n="tab_new">新</span></button>
+    <button data-tab="lib"><span data-i18n="tab_lib">阵容库 · 棋盘</span></button>
+    <button data-tab="dex"><span data-i18n="tab_dex">装备 · 图鉴</span></button>
+  </div>
+
+  <!-- ========== 开局引导 ========== -->
+  <section class="tab on" id="tab-guide">
+    <div class="guide">
+      <div>
+        <div class="card">
+          <h2><span data-i18n="g_hand">我的手牌</span> <span class="sub" data-i18n="g_hand_sub">点下面的英雄加进来，再点一次移除</span></h2>
+          <div class="handbox" id="handBox"></div>
+        </div>
+        <div class="card" style="margin-top:14px">
+          <h2><span data-i18n="g_pool">英雄池</span> <span class="sub" data-i18n="g_pool_sub">按费用分组 · 暗色的＝暂不属于任何收录阵容（打工牌 / 野怪 / 自然之力形态），悬停看原因</span></h2>
+          <div id="poolBox"></div>
+        </div>
+      </div>
+
+      <div class="card" style="position:sticky; top:16px">
+        <h2><span data-i18n="g_which">该走哪套</span> <span class="sub" id="advCount"></span></h2>
+        <div id="advList"></div>
+        <div class="hint" id="advHint"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== 阵容库 ========== -->
+  <section class="tab" id="tab-lib">
+    <div class="selector" id="selector"></div>
+    <div class="card" style="margin-top:12px">
+      <h2><span data-i18n="lb_rank">阵容强度榜</span> <span class="sub" data-i18n="lb_rank_sub">统计站 Diamond+ 近 6 天实测 · 名次越低越强 · 点任意行载入棋盘</span></h2>
+      <div style="overflow-x:auto">
+        <table class="stattable" id="statTable">
+          <thead><tr><th data-i18n="th_comp">阵容</th><th data-i18n="th_tier">档位</th><th data-i18n="th_avg">平均名次</th><th data-i18n="th_top4">前四率</th><th data-i18n="th_win">吃鸡率</th><th class="col-games" data-i18n="th_games">样本局数</th></tr></thead>
+          <tbody id="statBody"></tbody>
+        </table>
+      </div>
+      <div style="font-size:10.5px; color:var(--faint); margin-top:8px" data-i18n="lb_stat_note">数据源 tftcodex.com（2026-11-10，Patch 18.6）；13 套有 Diamond+ 实测数据；其余 5 套统计站未收录对应阵容家族（近 6 天样本不足 400 局），显示 —，档位章为攻略口径。</div>
+    </div>
+    <div class="main">
+      <div>
+        <div class="card" style="padding:12px 14px">
+          <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:4px">
+            <h2 style="margin:0" id="boardTitle" data-i18n="lb_board">棋盘</h2>
+            <div style="margin-left:auto; display:flex; gap:8px">
+              <button id="resetBtn" data-i18n="reset" style="background:var(--panel2); border:1px solid var(--line); color:var(--dim);
+                border-radius:7px; padding:5px 11px; font-size:11.5px; cursor:pointer; font-family:inherit;">重置棋盘</button>
+            </div>
+          </div>
+          <div class="board" id="board" style="background:none; border:none; padding:10px 4px 4px"></div>
+        </div>
+
+        <div class="card" style="margin-top:14px">
+          <h2><span data-i18n="lb_stage">阵容过渡</span> <span class="sub" data-i18n="lb_stage_sub">前期打工 → 中期补强 → 成型 · 每段标了人口 / 该存还是该花 / 该合哪件</span></h2>
+          <div id="stageBox"></div>
+        </div>
+
+        <div class="card" style="margin-top:14px">
+          <h2 data-i18n="lb_flow">运营节奏</h2>
+          <div class="flowtxt" id="flowTxt"></div>
+          <details>
+            <summary data-i18n="lb_more">站位细节 / 常见错误 / 什么时候放弃</summary>
+            <div class="flowtxt" id="detailTxt"></div>
+          </details>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="panel-block" id="sayBlock" style="display:none">
+          <h2 data-i18n="op_assist">作战助手</h2>
+          <div id="sayBox"></div>
+        </div>
+
+        <div class="panel-block">
+          <h2 data-i18n="op_carry">主 C</h2>
+          <div class="carrybox" id="carryBox"></div>
+        </div>
+
+        <div class="panel-block">
+          <h2 data-i18n="op_traits">羁绊（实时）</h2>
+          <div id="traitList"></div>
+        </div>
+
+        <div class="panel-block" id="missBlock" style="display:none">
+          <h2 data-i18n="op_miss">还差什么</h2>
+          <div id="missPanel"></div>
+        </div>
+
+        <div class="panel-block">
+          <h2 data-i18n="op_code">阵容码</h2>
+          <div class="codebox" id="codeBox"></div>
+        </div>
+
+        <div class="legend">
+          <span><i style="background:linear-gradient(150deg,#ff9b8a,#e8604f)"></i><span data-i18n="lg_ad">物理</span></span>
+          <span><i style="background:linear-gradient(150deg,#c4a6ff,#8b63e8)"></i><span data-i18n="lg_ap">法系</span></span>
+          <span><i style="background:linear-gradient(150deg,#8cc4ff,#4b86d6)"></i><span data-i18n="lg_def">防御</span></span>
+          <span><i style="background:linear-gradient(150deg,#7fe6d8,#33b3a0)"></i><span data-i18n="lg_ut">功能</span></span>
+          <span><i style="background:linear-gradient(150deg,#ffd782,#e0a01f)"></i><span data-i18n="lg_em">纹章</span></span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== 图鉴（装备 + 英雄） ========== -->
+  <style>
+  .dexsub .dexh{font-size:12px; color:var(--dim); margin:14px 0 8px; letter-spacing:1px;}
+  .baserow{display:flex; flex-wrap:wrap; gap:8px;}
+  .bchip{width:56px; text-align:center; cursor:pointer; transition:transform .15s;}
+  .bchip:hover{transform:translateY(-2px);}
+  .bchip .bi{width:40px; height:40px; margin:0 auto; border-radius:9px; display:flex; align-items:center; justify-content:center; font-size:17px; color:#0e1420; font-weight:700; background:linear-gradient(150deg,#dfe8f4,#9fb2c9); box-shadow:inset 0 1px 0 rgba(255,255,255,.6), 0 2px 6px rgba(0,0,0,.35);}
+  .bchip .bn{font-size:10.5px; color:var(--dim); margin-top:4px;}
+  .dexgrid{display:grid; grid-template-columns:repeat(auto-fill,minmax(148px,1fr)); gap:8px;}
+  .dchip{display:flex; align-items:center; gap:8px; padding:8px 9px; border-radius:10px; background:var(--panel3,#161d2b); border:1px solid #26314a; cursor:pointer; transition:transform .15s, border-color .15s;}
+  .dchip:hover{transform:translateY(-2px); border-color:var(--gold,#d4a542);}
+  .dchip .di{width:30px; height:30px; flex-shrink:0; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; color:#0e1420;}
+  .dchip .dt{min-width:0;}
+  .dchip .dt b{display:block; font-size:12px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .dchip .dt span{font-size:10px; color:var(--faint,#5a6880); display:flex; gap:3px; margin-top:2px; align-items:center;}
+  .dchip .dt .mini{width:14px; height:14px; border-radius:4px; display:inline-flex; align-items:center; justify-content:center; font-size:8px; color:#0e1420; font-weight:700;}
+  .herogrid{display:grid; grid-template-columns:repeat(auto-fill,minmax(64px,1fr)); gap:8px;}
+  .hcard{cursor:pointer; text-align:center; transition:transform .15s;}
+  .hcard:hover{transform:translateY(-2px);}
+  .hcard img,.hcard .ph{width:52px; height:52px; border-radius:50%; object-fit:cover; display:block; margin:0 auto; border:2px solid var(--c1);}
+  .hcard[data-cost="2"] img,.hcard[data-cost="2"] .ph{border-color:var(--c2);}
+  .hcard[data-cost="3"] img,.hcard[data-cost="3"] .ph{border-color:var(--c3);}
+  .hcard[data-cost="4"] img,.hcard[data-cost="4"] .ph{border-color:var(--c4);}
+  .hcard[data-cost="5"] img,.hcard[data-cost="5"] .ph{border-color:var(--c5);}
+  .hcard .hn{font-size:11px; margin-top:4px; color:var(--dim); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .hcard .hin{font-size:9px; color:var(--gold); margin-top:1px;}
+  .hfilter{display:flex; gap:6px; flex-wrap:wrap; margin-bottom:10px;}
+  .hfilter button{background:var(--panel3,#161d2b); border:1px solid #26314a; color:var(--dim); font-size:12px; padding:5px 12px; border-radius:14px; cursor:pointer;}
+  .hfilter button.on{color:#0e1420; background:var(--gold,#d4a542); border-color:var(--gold,#d4a542); font-weight:700;}
+  /* 弹层 */
+  .mask{position:fixed; inset:0; background:rgba(5,8,14,.72); z-index:900; display:none; align-items:center; justify-content:center; padding:18px; backdrop-filter:blur(3px);}
+  .mask.on{display:flex;}
+  .pop{width:min(420px,100%); max-height:82vh; overflow-y:auto; background:#141b29; border:1px solid #33405f; border-radius:16px; padding:18px 18px 16px; box-shadow:0 18px 50px rgba(0,0,0,.5); position:relative;}
+  .pop .x{position:absolute; top:10px; right:12px; width:28px; height:28px; border-radius:50%; border:1px solid #33405f; background:transparent; color:var(--dim); font-size:14px; cursor:pointer;}
+  .pop h3{margin:0 26px 4px 0; font-size:17px; display:flex; align-items:center; gap:8px; flex-wrap:wrap;}
+  .pop .gtag{font-size:10px; padding:2px 8px; border-radius:9px; color:#0e1420; font-weight:700;}
+  .pop .pdesc{font-size:12.5px; color:var(--dim); line-height:1.6; margin:6px 0 12px;}
+  .recipe{display:flex; align-items:center; gap:8px; background:rgba(255,255,255,.04); border:1px solid #26314a; border-radius:12px; padding:12px; justify-content:center; margin-bottom:12px;}
+  .recipe .rbase{width:44px; height:44px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:18px; font-weight:700; color:#0e1420; background:linear-gradient(150deg,#dfe8f4,#9fb2c9); box-shadow:inset 0 1px 0 rgba(255,255,255,.6);}
+  .recipe .rop{font-size:16px; color:var(--gold); font-weight:700;}
+  .recipe .ritem{width:48px; height:48px; border-radius:11px; display:flex; align-items:center; justify-content:center; font-size:17px; font-weight:700; color:#0e1420; box-shadow:0 3px 10px rgba(0,0,0,.4);}
+  .recipe .rname{font-size:11px; color:var(--dim); text-align:center; margin-top:4px; max-width:56px;}
+  .recipe .rcol{display:flex; flex-direction:column; align-items:center;}
+  .pop .sec{font-size:11px; color:var(--faint,#5a6880); letter-spacing:1px; margin:10px 0 6px;}
+  .whocheds{display:flex; flex-wrap:wrap; gap:6px;}
+  .whocheds .wc{font-size:11.5px; padding:4px 10px; border-radius:12px; background:rgba(255,255,255,.05); border:1px solid #26314a; color:var(--dim);}
+  .whocheds .wc b{color:var(--gold);}
+  .whitems{display:flex; flex-wrap:wrap; gap:5px; margin-top:6px; max-width:100%; justify-content:flex-end;}
+  .pop .it{width:26px; height:26px; font-size:11px; border-radius:7px; display:inline-flex; align-items:center; justify-content:center; color:#0e1420; font-weight:700; cursor:pointer;}
+  .hpop-top{display:flex; gap:14px; align-items:center; margin-bottom:10px;}
+  .hpop-top img,.hpop-top .ph{width:64px; height:64px; border-radius:50%; object-fit:cover; border:3px solid var(--c4); flex-shrink:0;}
+  .traits{display:flex; flex-wrap:wrap; gap:5px;}
+  .traits .tt{font-size:11px; padding:3px 10px; border-radius:11px; background:rgba(212,165,66,.12); border:1px solid rgba(212,165,66,.4); color:var(--gold);}
+  .compline{display:flex; align-items:center; gap:8px; padding:7px 0; border-bottom:1px dashed #222c42; flex-wrap:wrap; row-gap:2px;}
+  .compline:last-child{border-bottom:none;}
+  .compline .cn{font-size:12px; color:var(--dim); min-width:0; flex:1 1 150px;}
+  </style>
+  <section class="tab" id="tab-dex">
+    <div class="card">
+      <h2>装备图鉴 <span class="sub">点装备看合成路径 · 点散件看它能合成什么</span></h2>
+      <div class="dexsub">
+        <div class="dexh">基础散件（10 种合成原料）</div>
+        <div class="baserow" id="dexBase"></div>
+        <div class="dexh" style="margin-top:18px">成型装备（点开看两件散件怎么合）</div>
+        <div id="dexGroups"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h2>英雄图鉴 <span class="sub">74 弈子 · 点开看羁绊 / 目标星级 / 该带什么装备</span></h2>
+      <div class="hfilter" id="hFilter"></div>
+      <div id="heroWrap"></div>
+    </div>
+  </section>
+
+  <div class="foot">
+    英雄头像来自 Riot 官方 DataDragon（16.22.1），野怪类单位用字牌代替。
+    羁绊数字按场上剩余棋子实时统计，红条表示已跌破成型所需数量。
+    阵容数据取自国服 S18「自然之力」18.6 版本游戏内文件；强度榜取自统计站 tftcodex.com Diamond+ 近 6 天样本（2026-11-10），会随热更新变动。
+  </div>
+</div>
+
+<div class="toast" id="toast"><span class="ic">💬</span><span id="toastTxt"></span></div>
+
+<script src="i18n.js"></script>
+<script src="auth.js"></script>
+<script>
+/* ============================================================
+   阵容数据
+   u: { n 名称, id ddragon ID(null=野怪), c 费用, r 定位, row 0前排 1后排,
+        carry 主C标记, t 提供羁绊, it 装备, alt 替代方案 }
+   ============================================================ */
+const DDRAGON = 'https://ddragon.leagueoflegends.com/cdn/16.22.1/img/champion/';
+
+
+/* S18 全量官方单位表（74 个，CommunityDragon zh_cn 2026-11-08 拉取） */
+const ALL18 = [
+    {n:'魔沼蛙',id:null,c:2,t:['峡谷野怪','魔战士']},
+    {n:'暗影狼',id:null,c:2,t:['峡谷野怪','狂战士']},
+    {n:'苍蓝哨戒',id:null,c:1,t:['峡谷野怪','神谕']},
+    {n:'绯红树怪',id:null,c:1,t:['峡谷野怪','猎人']},
+    {n:'峡谷迅捷蟹',id:null,c:2,t:['峡谷野怪','主宰']},
+    {n:'远古石甲虫',id:null,c:3,t:['峡谷野怪','斗士']},
+    {n:'苍蓝雕纹魔像',id:null,c:4,t:['峡谷野怪','重装战士','神谕']},
+    {n:'绯红印记树怪',id:null,c:4,t:['峡谷野怪','狂战士']},
+    {n:'霞',id:'Xayah',c:1,t:['永恒之森','花仙子','迅捷射手']},
+    {n:'奥恩',id:'Ornn',c:1,t:['永恒之森','护卫']},
+    {n:'奈德丽',id:'Nidalee',c:4,t:['野兽之灵','魔战士']},
+    {n:'赫卡里姆',id:'Hecarim',c:3,t:['永恒之森','重装战士']},
+    {n:'伊泽瑞尔',id:'Ezreal',c:4,t:['永恒之森','裁决使']},
+    {n:'阿兹尔',id:'Azir',c:3,t:['黑荆棘','裁决使','召唤师']},
+    {n:'雷克塞',id:'RekSai',c:1,t:['黑荆棘','斗士']},
+    {n:'维迦',id:'Veigar',c:1,t:['黑荆棘','约德尔人和朋友','法师']},
+    {n:'茂凯',id:'Maokai',c:5,t:['远古树精','主宰']},
+    {n:'墨菲特',id:'Malphite',c:4,t:['黑荆棘','魔岩巨兽']},
+    {n:'约里克',id:'Yorick',c:1,t:['灵魂莲华','主宰','召唤师']},
+    {n:'芸阿娜',id:'Yunara',c:2,t:['灵魂莲华','裁决使']},
+    {n:'瑟提',id:'Sett',c:4,t:['灵魂莲华','斗士']},
+    {n:'阿狸',id:'Ahri',c:4,t:['灵魂莲华','法师']},
+    {n:'艾希',id:'Ashe',c:5,t:['灵魂莲华','猎人']},
+    {n:'伊莉丝',id:'Elise',c:2,t:['魔女','重装战士']},
+    {n:'凯特琳',id:'Caitlyn',c:2,t:['魔女','猎人']},
+    {n:'卡西奥佩娅',id:'Cassiopeia',c:3,t:['魔女','法师']},
+    {n:'莫甘娜',id:'Morgana',c:4,t:['魔女','神谕']},
+    {n:'洛',id:'Rakan',c:1,t:['花仙子','主宰','重装战士']},
+    {n:'莉莉娅',id:'Lillia',c:4,t:['花仙子','护卫']},
+    {n:'可酷伯',id:'Kobuko',c:1,t:['约德尔人和朋友','斗士']},
+    {n:'提莫',id:'Teemo',c:2,t:['约德尔人和朋友','神谕']},
+    {n:'拉莫斯',id:'Rammus',c:3,t:['约德尔人和朋友','护卫']},
+    {n:'纳尔',id:'Gnar',c:5,t:['永恒之森','约德尔人和朋友','斗士']},
+    {n:'崔丝塔娜',id:'Tristana',c:3,t:['花仙子','约德尔人和朋友','猎人']},
+    {n:'希维尔',id:'Sivir',c:4,t:['野兽之灵','猎人']},
+    {n:'蔚',id:'Vi',c:3,t:['野兽之灵','主宰']},
+    {n:'阿卡丽',id:'Akali',c:1,t:['地狱火','魔战士','狂战士']},
+    {n:'韦鲁斯',id:'Varus',c:1,t:['地狱火','迅捷射手']},
+    {n:'阿木木',id:'Amumu',c:4,t:['地狱火','主宰']},
+    {n:'凯南',id:'Kennen',c:5,t:['地狱火','裁决使']},
+    {n:'厄斐琉斯',id:'Aphelios',c:4,t:['月蚀骑士','迅捷射手']},
+    {n:'黛安娜',id:'Diana',c:3,t:['月蚀骑士','狂战士','重装战士']},
+    {n:'拉露恩',id:'Alune',c:5,t:['月华神女','月蚀骑士','法师']},
+    {n:'蕾欧娜',id:'Leona',c:1,t:['日蚀骑士','护卫']},
+    {n:'凯尔',id:'Kayle',c:2,t:['日蚀骑士','迅捷射手']},
+    {n:'瑟庄妮',id:'Sejuani',c:2,t:['日蚀骑士','主宰']},
+    {n:'卡兹克',id:'KhaZix',c:3,t:['宿敌']},
+    {n:'雷恩加尔',id:'Rengar',c:3,t:['宿敌']},
+    {n:'克格莫',id:'KogMaw',c:3,t:['帝王斑蝶','魔战士','神谕']},
+    {n:'婕拉',id:'Zyra',c:4,t:['荆棘之兴','召唤师']},
+    {n:'费德提克',id:'Fiddlesticks',c:3,t:['绝命花妖','护卫','法师']},
+    {n:'索拉卡',id:'Soraka',c:4,t:['绝命花妖','裁决使']},
+    {n:'塔里克',id:'Taric',c:5,t:['宝石骑士','重装战士']},
+    {n:'艾翁',id:'Ivern',c:5,t:['翠神']},
+    {n:'拉克丝',id:'Lux',c:5,t:['自然之力！大元素使'],lum:1},
+    {n:'阿利斯塔',id:'Alistar',c:2,t:['永恒之森','斗士']},
+    {n:'德莱文',id:'Draven',c:5,t:['赏金猎人']},
+    {n:'远古巨龙',id:null,c:5,t:['顶级掠食者','峡谷野怪']},
+    {n:'卡尔玛',id:'Karma',c:1,t:['灵魂莲华','法师']},
+    {n:'乐芙兰',id:'LeBlanc',c:2,t:['永恒之森','法师']},
+    {n:'易',id:'MasterYi',c:3,t:['灵魂莲华','魔战士']},
+    {n:'慎',id:'Shen',c:2,t:['地狱火','护卫']},
+    {n:'沃里克',id:'Warwick',c:2,t:['黑荆棘','狂战士']},
+    {n:'卡蜜尔',id:'Camille',c:1,t:['魔女','狂战士']},
+    {n:'拉克丝 (黑荆棘)',id:'Lux',c:5,t:['黑荆棘','自然之力！大元素使']},
+    {n:'拉克丝 (灵魂莲华)',id:'Lux',c:5,t:['灵魂莲华','自然之力！大元素使']},
+    {n:'拉克丝 (魔女)',id:'Lux',c:5,t:['魔女','自然之力！大元素使']},
+    {n:'拉克丝 (永恒之森)',id:'Lux',c:5,t:['永恒之森','自然之力！大元素使']},
+    {n:'拉克丝 (花仙子)',id:'Lux',c:5,t:['花仙子','自然之力！大元素使']},
+    {n:'拉克丝 (地狱火)',id:'Lux',c:5,t:['地狱火','自然之力！大元素使']},
+    {n:'拉克丝 (月蚀骑士)',id:'Lux',c:5,t:['月蚀骑士','自然之力！大元素使']},
+    {n:'拉克丝 (野兽之灵)',id:'Lux',c:5,t:['野兽之灵','自然之力！大元素使']},
+    {n:'拉克丝 (日蚀骑士)',id:'Lux',c:5,t:['日蚀骑士','自然之力！大元素使']},
+    {n:'深红锋喙鸟',id:null,c:3,t:['峡谷野怪','召唤师','迅捷射手']}
+];
+
+const COMPS = [
+  {
+    id:'draven', name:'巨龙德莱文', tier:'S', avg:4.15, top4:53.7, win:24.3, games:93440, style:'上九运营',
+    code:'024153ed43042840b3fc4043fb000000TFTSet18',
+    traits:[['峡谷野怪',3],['地狱火',2],['主宰',2],['重装战士',2]],
+    flow:'<b>2-1 上 4</b>：抓大剑和弓，有二星就上，没有就连败攒钱。<b>3-2 上 6</b>：凑出野怪三档。<b>四阶段</b>：死保 50 金利息，牌全卖了都不心疼——这个等级池里没有你要的东西。<b>5-1 上 9 开搜</b>：平均 33 抽（66 金）能把德莱文搜到二星；有同行抢就按 54 抽备预算。',
+    pos:'茂凯、阿木木、塔里克、苍蓝魔像一字排开顶第一排；凯南第二排左侧冲刺穿人堆；远古巨龙压第二排正中（普攻溅射能扫到相邻每一格）；德莱文沉底靠左，艾翁站他侧后方。对面有刺客就把德莱文往中间收一格。',
+    mistakes:['九人口却想站满九张牌——远古巨龙占两个格，那个空格不是缺陷','五阶段之前把钱花在四费卡上','为了凑第五张五费的一档羁绊去拆阵容'],
+    giveUp:'唯一信号是「抢」。无人抢时名次 3.75，一家 4.08，两家以上掉到 4.37——45% 的对局都有人抢。两家明牌抢而你一张没白嫖到，掉头走兽灵奈德丽，物理装一样能用。',
+    pivot:[['nidalee','物理装一件不浪费，前排换成四费更好成型']],
+    units:[
+      {n:'茂凯',id:'Maokai',c:5,r:'主坦',row:0,t:['远古树精','主宰'],it:[{n:'石像鬼石板甲',k:'def'},{n:'狂徒铠甲',k:'def'},{n:'振奋盔甲',k:'def'}],
+       alt:[['塔里克','同费用前排，把翡翠护盾给德莱文'],['阿木木','四费前排，肉装直接继承']]},
+      {n:'阿木木',id:'Amumu',c:4,r:'前排',row:0,t:['地狱火','主宰'],it:[{n:'石像鬼石板甲',k:'def'}],
+       alt:[['峡谷迅捷蟹','二费前排，凑野怪三档'],['任意四费前排','保住第一排人数就行']]},
+      {n:'峡谷迅捷蟹',id:null,c:2,r:'前排',row:0,t:['峡谷野怪','主宰'],it:[{n:'肉装',k:'def'}],
+       alt:[['深红锋喙鸟','同为野怪位，召唤师多一条'],['魔沼蛙','野怪二档还在，魔战士多一条']]},
+      {n:'塔里克',id:'Taric',c:5,r:'前排',row:0,t:['宝石骑士','重装战士'],it:[{n:'翡翠配对',k:'util'}],
+       alt:[['茂凯','把远古树精换成主宰位'],['任意五费前排','塔里克的价值在配对，没了就纯站场']]},
+      {n:'苍蓝雕纹魔像',id:null,c:4,r:'前排',row:0,t:['峡谷野怪','重装战士','神谕'],it:[{n:'肉装 / 阿尔法印记',k:'def'}],
+       alt:[['绯红印记树怪','同为峡谷野怪，印记照样给'],['深红锋喙鸟','低费野怪，勉强凑三档']]},
+      {n:'凯南',id:'Kennen',c:5,r:'副 C',row:1,t:['地狱火','裁决使'],it:[{n:'窃贼手套',k:'util'}],
+       alt:[['德莱文','双物理 C 的思路，但装备要重新分'],['任意五费输出','凯南是清场位，缺了他对面后排会活得久']]},
+      {n:'远古巨龙',id:null,c:5,r:'副 C',row:1,t:['顶级掠食者','峡谷野怪'],it:[{n:'无尽之刃',k:'ad'},{n:'最后的轻语',k:'ad'},{n:'强袭者的链枷',k:'ad'}],
+       alt:[['艾希','同为五费物理输出，装的三件可以直接给'],['德莱文','所有物理装集中给德莱文，走单核']]},
+      {n:'艾翁',id:'Ivern',c:5,r:'功能',row:1,t:['翠神'],it:[{n:'种子位',k:'util'}],
+       alt:[['任意五费','艾翁只提供种子增益，缺了影响上限不影响骨架'],['塔里克','把翡翠配对改成给德莱文']]},
+      {n:'德莱文',id:'Draven',c:5,r:'主 C',row:1,carry:1,t:['赏金猎人'],it:[{n:'鬼索的狂暴之刃',k:'util'},{n:'海妖之怒',k:'ad'},{n:'死亡之刃',k:'ad'}],
+       alt:[['兽灵奈德丽','物理三件通用，换一套继续打'],['艾希 / 厄斐琉斯','物理装不浪费，但阵容要重排']]}
+    ]
+  },
+  {
+    id:'yunara', name:'日蚀芸阿娜', tier:'A', avg:4.38, top4:53.0, win:13.6, games:67263, style:'六人口追三',
+    code:'0241142743a40a41040743b000000000TFTSet18',
+    traits:[['日蚀骑士',3],['灵魂莲华',3],['主宰',2],['法师',2]],
+    flow:'<b>五级把七个位置摆满就不再加等级</b>。追三名单：卡尔玛、蕾欧娜、约里克三张一费，加瑟庄妮、芸阿娜两张二费——<b>五个三星就算毕业</b>，凯尔和乐芙兰按牌面补。',
+    pos:'前排三个一字顶住，卡尔玛站最后排最远角，芸阿娜在她侧翼吃日蚀的额外魔法伤害。日蚀骑士按三星数量把额外魔法伤害换成真实伤害，所以追三就是强度本身。',
+    mistakes:['二阶段就把拳套合进裁决使纹章——结果四阶段都没见过第二张蕾欧娜','提前上等级，商店结构被摊薄，追三时间往后推两个阶段'],
+    giveUp:'三张一费差两张以上还没三星、四阶段血线掉到 30 以下，说明这局的牌池不给你面子。把日蚀纹章转给别的阵容，或者直接转常规运营。',
+    pivot:[['karma','同样是一费追三的慢节奏，转过去不用改打法'],['varus','共享日蚀骑士骨架，装备换一换就能接']],
+    units:[
+      {n:'蕾欧娜',id:'Leona',c:1,r:'前排',row:0,t:['日蚀骑士','护卫'],it:[{n:'肉装',k:'def'}],
+       alt:[['约里克','同一张一费前排，追三名单里的另一张'],['波比','一费前排，肉装直接穿']]},
+      {n:'约里克',id:'Yorick',c:1,r:'前排',row:0,t:['灵魂莲华','主宰','召唤师'],it:[{n:'肉装',k:'def'}],
+       alt:[['蕾欧娜','一费前排互换，都是日蚀'],['波比','一费前排，肉装直接穿']]},
+      {n:'瑟庄妮',id:'Sejuani',c:2,r:'前排',row:0,t:['日蚀骑士','主宰'],it:[{n:'肉装',k:'def'}],
+       alt:[['蔚','二费前排，带野兽之灵'],['任意二费前排','前面三个位置的第三个坑']]},
+      {n:'卡尔玛',id:'Karma',c:1,r:'主 C',row:1,carry:1,t:['灵魂莲华','法师'],it:[{n:'蓝霸符',k:'util'},{n:'珠光护手',k:'ap'},{n:'大天使之杖',k:'ap'}],
+       alt:[['乐芙兰','法系副 C，蓝霸符可以给她'],['转永恒之森卡尔玛','同一张 C，另一套更好成型']]},
+      {n:'芸阿娜',id:'Yunara',c:2,r:'副 C',row:1,t:['灵魂莲华','裁决使'],it:[{n:'物理 / 攻速',k:'ad'}],
+       alt:[['凯尔','同为二费，装备能通用一半'],['任意二费输出','副 C 位换人不影响骨架']]},
+      {n:'凯尔',id:'Kayle',c:2,r:'补位',row:1,t:['日蚀骑士','迅捷射手'],it:[{n:'按牌面补',k:'util'}],
+       alt:[['乐芙兰','按牌面补的另一个选择'],['不补','七人口摆满就行，这个位置可以空着']]},
+      {n:'乐芙兰',id:'LeBlanc',c:2,r:'补位',row:1,t:['永恒之森','法师'],it:[{n:'按牌面补',k:'util'}],
+       alt:[['凯尔','按牌面补的另一个选择'],['不补','七人口摆满就行']]}
+    ]
+  },
+  {
+    id:'ahri', name:'神谕阿狸', tier:'A', avg:4.38, top4:52.9, win:11.6, games:50542, style:'八人口运营',
+    code:'0243042840f42a4294073e9418000000TFTSet18',
+    traits:[['神谕',3],['灵魂莲华',4],['法师',2]],
+    flow:'<b>四阶段拉八开搜</b>，八人口四张四费加一张五费。<b>不追三</b>——四费追三的钱够你多搜两张两星，收益差得远。核心是把神谕纹章给阿狸：神谕 4 档时全队回蓝从 1 变 2，场上不戴章的七个人一起翻倍。',
+    pos:'魔像背三件誓约顶最前面不停放大给全队回蓝，阿狸戴神谕纹章站后排，莫甘娜在另一侧撒重伤覆盖，瑟提填前排缺口。',
+    mistakes:['把神谕纹章给了别人——它在阿狸身上是把回蓝从全队最低档抬到最高档','只盯着神谕自己那一列（4→6），漏掉全队 1→2 那一列的翻倍'],
+    giveUp:'纹章一直不来，阿狸就只能当普通法师用，中期会被地狱火从头点到尾。八级搜了九块钱还见不到第一张阿狸，准备转主宰婕拉。',
+    pivot:[['zyra','法系装全部能用，前排更厚不容易崩']],
+    units:[
+      {n:'苍蓝雕纹魔像',id:null,c:4,r:'主坦',row:0,t:['峡谷野怪','重装战士','神谕'],it:[{n:'圣盾使的誓约',k:'def'},{n:'圣盾使的誓约',k:'def'},{n:'圣盾使的誓约',k:'def'}],
+       alt:[['任意重装前排','魔像的价值是三件誓约的回蓝循环，换个肉盾会掉一档'],['峡谷迅捷蟹','野怪位，凑三档但坦度差很多']]},
+      {n:'瑟提',id:'Sett',c:4,r:'前排',row:0,t:['灵魂莲华','斗士'],it:[{n:'肉装',k:'def'}],
+       alt:[['阿木木','四费前排，肉装继承'],['任意四费前排','保住第一排']]},
+      {n:'阿狸',id:'Ahri',c:4,r:'主 C',row:1,carry:1,t:['灵魂莲华','法师'],it:[{n:'神谕纹章',k:'emblem'},{n:'珠光护手',k:'ap'},{n:'强袭者的链枷',k:'ap'}],
+       alt:[['莫甘娜','法系装备直接继承，但缺了纹章回蓝会掉档'],['转主宰婕拉','纹章不来就走这条路，同一批法系装']]},
+      {n:'莫甘娜',id:'Morgana',c:4,r:'副 C',row:1,t:['魔女','神谕'],it:[{n:'莫雷洛秘典',k:'ap'},{n:'灭世者的死亡之帽',k:'ap'},{n:'虚空之杖',k:'ap'}],
+       alt:[['阿狸','法系装给她，但要重新分配纹章'],['任意四费法系','重伤效果会丢，对面治疗多的局很难受']]},
+      {n:'易',id:'MasterYi',c:3,r:'副 C',row:1,t:['灵魂莲华','魔战士'],it:[{n:'物理 / 攻速',k:'ad'}],
+       alt:[['任意三费','灵魂莲华四档会掉'],['不上','专注阿狸单核']]},
+      {n:'艾希',id:'Ashe',c:5,r:'副 C',row:1,t:['灵魂莲华','猎人'],it:[{n:'物理装',k:'ad'}],
+       alt:[['易','同为灵魂莲华，装备换一半'],['不上','钱留着补二星']]},
+      {n:'提莫',id:'Teemo',c:2,r:'功能',row:1,t:['约德尔人和朋友','神谕'],it:[{n:'法系装',k:'ap'}],
+       alt:[['卡西奥佩娅','同为补位，法师档会变'],['留着','神谕三档就靠他']]},
+      {n:'卡西奥佩娅',id:'Cassiopeia',c:3,r:'副 C',row:1,t:['魔女','法师'],it:[{n:'法系输出',k:'ap'}],
+       alt:[['任意三费法系','法师二档还在'],['不上','八人口满编，钱留着补二星']]}
+    ]
+  },
+  {
+    id:'zyra', name:'主宰婕拉', tier:'B', avg:4.51, top4:49.8, win:11.3, games:24360, style:'八人口运营',
+    code:'0242043a4273ed43742641b43c000000TFTSet18',
+    traits:[['主宰',6],['荆棘之兴',1],['召唤师',2]],
+    flow:'<b>八人口满编就停，不追三</b>——婕拉和奈德丽都是四费，追三等于把钱倒进海里。四阶段八级开搜，剩下的钱上九找第二张五费，或者存着补二星。',
+    pos:'六个主宰全站前排承受伤害，婕拉站最后一排。主宰 6 档给主宰 42% 伤害减免，婕拉自己只吃到队伍那 8%——<b>这套的胜负手是前排能撑多久，不是婕拉的面板</b>。',
+    mistakes:['给婕拉堆纯输出装——她的强度来自双大天使每五秒叠一层，需要时间','让婕拉站前排'],
+    giveUp:'前排站不住就没有这套。四阶段如果六个主宰只有两三个到二星，婕拉的大天使叠不起来，直接转回兽灵奈德丽用同一批前排。',
+    pivot:[['nidalee','六个前排原样能用，副 C 换成物理'],['elise','同样吃重装前排，法系装能转']],
+    units:[
+      {n:'洛',id:'Rakan',c:1,r:'前排',row:0,t:['花仙子','主宰','重装战士'],it:[{n:'肉装',k:'def'}],
+       alt:[['任意二费前排','主宰位凑数，坦度会掉']]},
+      {n:'约里克',id:'Yorick',c:1,r:'前排',row:0,t:['灵魂莲华','主宰','召唤师'],it:[{n:'肉装',k:'def'}],
+       alt:[['波比','一费前排，主宰位'],['任意一费前排','保住六主宰人数']]},
+      {n:'瑟庄妮',id:'Sejuani',c:2,r:'前排',row:0,t:['日蚀骑士','主宰'],it:[{n:'肉装',k:'def'}],
+       alt:[['蔚','三费前排，带主宰'],['任意二费前排','']]},
+      {n:'阿木木',id:'Amumu',c:4,r:'前排',row:0,t:['地狱火','主宰'],it:[{n:'石像鬼石板甲',k:'def'},{n:'狂徒铠甲',k:'def'}],
+       alt:[['任意四费前排','阿木木的控制是这套的重要一环，缺了会漏人']]},
+      {n:'蔚',id:'Vi',c:3,r:'前排',row:0,t:['野兽之灵','主宰'],it:[{n:'肉装',k:'def'}],
+       alt:[['任意三费前排','主宰位，凑人数'],['瑟庄妮','二费换三费，坦度差一点']]},
+      {n:'峡谷迅捷蟹',id:null,c:2,r:'前排',row:0,t:['峡谷野怪','主宰'],it:[{n:'肉装',k:'def'}],
+       alt:[['任意二费前排','第六个主宰位，谁便宜上谁']]},
+      {n:'婕拉',id:'Zyra',c:4,r:'主 C',row:1,carry:1,t:['荆棘之兴','召唤师'],it:[{n:'大天使之杖',k:'ap'},{n:'大天使之杖',k:'ap'},{n:'海克斯科技枪刃',k:'ap'}],
+       alt:[['奈德丽','同费用，转成物理输出线'],['转黑暗仪式伊莉丝','同一批前排，换个 C']]},
+      {n:'奈德丽',id:'Nidalee',c:4,r:'副 C',row:1,t:['野兽之灵','魔战士'],it:[{n:'物理 / 攻速',k:'ad'}],
+       alt:[['任意四费输出','副 C 位，装备能转移'],['不上','专注单核婕拉，钱用来升前排']]}
+    ]
+  },
+  {
+    id:'nidalee', name:'兽灵奈德丽', tier:'A', avg:4.42, top4:53.0, win:8.1, games:35394, style:'八人口运营',
+    code:'0242042842b3ed41240e41b42c000000TFTSet18',
+    traits:[['花仙子',2],['主宰',2],['重装战士',2],['神谕',2],['地狱火',2],['护卫',2],['魔战士',2],['野兽之灵',2]],
+    flow:'<b>2-1 抢弓</b>、第二顺位大剑；<b>2-3 到 3-2</b> 用蔚开野兽之灵；<b>3-5 到 4-1 拉七</b>，把霞换成希维尔；<b>4-2 拉八一次搜完</b>，顺序是奈德丽、阿木木、莉莉娅、希维尔，四个里有三个到两星就停手。',
+    pos:'五个前排连成一条线站第一排，洛和莉莉娅守两端，魔像和慎居中，阿木木紧挨莉莉娅。克格莫站第二排，奈德丽站第三排正中（标枪挑最远目标，站中间能把弹道拉成斜线绕过前排），希维尔缩最后一排靠左。',
+    mistakes:['把无尽给奈德丽——数据明确：无尽只给希维尔，给她的人名次 4.30','把洛当一费垃圾卖掉（他一个人带三条羁绊，卖了他八条二档掉三条）','前排站太散（护卫的 25 双抗按人算，站散了每段都薄）'],
+    giveUp:'三个信号：① 四阶段八人口搜完，奈德丽只有一张、希维尔也没两星，输出是空的；② 场上有两家同行抢四费池；③ 无尽到四阶段还没合出来，伤害差一整档。',
+    pivot:[['zyra','前排原样能用，换成法系单核'],['draven','物理装攒着等五费，上九翻盘']],
+    units:[
+      {n:'洛',id:'Rakan',c:1,r:'连接器',row:0,t:['花仙子','主宰','重装战士'],it:[{n:'纯挂件',k:'util'}],
+       alt:[['别卖他','他一个人带三条羁绊，换掉等于同时掉三条']]},
+      {n:'苍蓝雕纹魔像',id:null,c:4,r:'前排',row:0,t:['峡谷野怪','重装战士','神谕'],it:[{n:'纯挂件',k:'util'}],
+       alt:[['慎','同为前排，少一条神谕'],['任意重装前排','重装二档会掉']]},
+      {n:'慎',id:'Shen',c:2,r:'前排',row:0,t:['地狱火','护卫'],it:[{n:'纯挂件',k:'util'}],
+       alt:[['任意二费前排','前排位，只影响重装档位']]},
+      {n:'阿木木',id:'Amumu',c:4,r:'主坦',row:0,t:['地狱火','主宰'],it:[{n:'石像鬼石板甲',k:'def'},{n:'振奋盔甲',k:'def'},{n:'狂徒铠甲',k:'def'}],
+       alt:[['莉莉娅','副坦顶上来，装备能用一半'],['任意四费前排','前排会薄一层']]},
+      {n:'莉莉娅',id:'Lillia',c:4,r:'副坦',row:0,t:['花仙子','护卫'],it:[{n:'适应性头盔',k:'def'},{n:'圣盾使的誓约',k:'def'},{n:'振奋盔甲',k:'def'}],
+       alt:[['阿木木','主坦副坦互换'],['任意四费前排','护卫位会掉']]},
+      {n:'克格莫',id:'KogMaw',c:3,r:'破甲',row:1,t:['帝王斑蝶','魔战士','神谕'],it:[{n:'纯挂件',k:'util'}],
+       alt:[['任意三费','他带三条羁绊，换人会掉档'],['留着','破甲很关键，别为了换而换']]},
+      {n:'奈德丽',id:'Nidalee',c:4,r:'主 C',row:1,carry:1,t:['野兽之灵','魔战士'],it:[{n:'饮血剑',k:'ad'},{n:'夜之锋刃',k:'ad'},{n:'斯特拉克的挑战护手',k:'ad'}],
+       alt:[['希维尔','把无尽和死刃集中给她，转单核'],['转主宰婕拉','前排骨架能复用']]},
+      {n:'希维尔',id:'Sivir',c:4,r:'副 C',row:1,t:['野兽之灵','猎人'],it:[{n:'蓝霸符',k:'util'},{n:'死亡之刃',k:'ad'},{n:'无尽之刃',k:'ad'}],
+       alt:[['奈德丽','双远程的另一个，但无尽必须给她'],['任意四费物理','清场能力会掉一档']]}
+    ]
+  },
+  {
+    id:'aphelios', name:'重装厄斐琉斯', tier:'B', avg:4.62, top4:48.9, win:6.7, games:3367, style:'八人口运营',
+    code:'024034303fa4283f343c4223ef000000TFTSet18',
+    traits:[['重装战士',3],['峡谷野怪',3],['月蚀骑士',2],['迅捷射手',2],['狂战士',3]],
+    flow:'<b>八人口满编就停</b>，四费四张加五费一张，追三等于做梦。钱用来补二星。核心是把厄斐琉斯拖到塔里克身上——两个人共享翡翠护盾和额外魔法伤害，这是这套唯一的上限来源。',
+    pos:'五个前排撑第一排，塔里克和厄斐琉斯贴在一起。重装 4 档给 30% 最大生命值护盾，开战和掉到 50% 血各给一次，每次持续 10 秒。',
+    mistakes:['没做羊刀——深红锋喙鸟输出直接差一截','把塔里克当纯肉盾用，忘了他和厄斐琉斯的连线'],
+    giveUp:'塔里克八级才来的话前排散得太快，这套就只剩一个四费 C 硬撑。八级搜完塔里克影子都没有，把厄斐琉斯的三件转给希维尔，走兽灵奈德丽线。',
+    pivot:[['nidalee','物理三件直接给希维尔'],['varus','同吃月蚀和迅捷射手']],
+    units:[
+      {n:'暗影狼',id:null,c:2,r:'前排',row:0,t:['峡谷野怪','狂战士'],it:[{n:'肉装',k:'def'}],
+       alt:[['任意二费前排','重装位，坦度会掉']]},
+      {n:'赫卡里姆',id:'Hecarim',c:3,r:'前排',row:0,t:['永恒之森','重装战士'],it:[{n:'肉装',k:'def'}],
+       alt:[['黛安娜','同费用重装，位置互换'],['任意三费前排','']]},
+      {n:'黛安娜',id:'Diana',c:3,r:'前排',row:0,t:['月蚀骑士','狂战士','重装战士'],it:[{n:'肉装',k:'def'}],
+       alt:[['赫卡里姆','同费用重装'],['慎','低费重装，月蚀会掉']]},
+      {n:'绯红印记树怪',id:null,c:4,r:'前排',row:0,t:['峡谷野怪','狂战士'],it:[{n:'肉装',k:'def'}],
+       alt:[['苍蓝雕纹魔像','同为野怪位，重装二档还在'],['任意四费前排','野怪三档会掉']]},
+      {n:'塔里克',id:'Taric',c:5,r:'核心连线',row:0,t:['宝石骑士','重装战士'],it:[{n:'翡翠配对 → 厄斐琉斯',k:'util'}],
+       alt:[['阿木木','前排顶住但失去连线，上限掉一档'],['转兽灵奈德丽','装备转给希维尔']]},
+      {n:'婕拉',id:'Zyra',c:4,r:'副 C',row:1,t:['荆棘之兴','召唤师'],it:[{n:'法系',k:'ap'}],
+       alt:[['任意四费法系','副 C 位'],['不上','专心单核厄斐琉斯']]},
+      {n:'厄斐琉斯',id:'Aphelios',c:4,r:'主 C',row:1,carry:1,t:['月蚀骑士','迅捷射手'],it:[{n:'死亡之刃',k:'ad'},{n:'无尽之刃',k:'ad'},{n:'红霸符',k:'ad'}],
+       alt:[['希维尔','物理三件通用，转兽灵奈德丽'],['转巨龙德莱文','物理装攒着等五费']]},
+      {n:'深红锋喙鸟',id:null,c:3,r:'功能',row:1,t:['峡谷野怪','召唤师','迅捷射手'],it:[{n:'鬼索的狂暴之刃',k:'util'}],
+       alt:[['任意二费野怪','野怪三档会掉一层'],['留着','没它野怪印记开不出来']]}
+    ]
+  },
+  {
+    id:'riftblue', name:'七野怪红蓝', tier:'S', avg:4.40, top4:53.5, win:6.2, games:6941, style:'一费赌狗',
+    code:'',
+    traits:[['峡谷野怪',7],['神谕',2],['重装战士',2],['召唤师',1],['主宰',1],['顶级掠食者',1],['宝石骑士',1]],
+    flow:'<b>二阶段只留体系卡，一张别卖</b>，连败攒到 50 金开始吃利息。<b>三级和五级是搜牌窗口</b>：苍蓝哨戒是一费，等级越低出现率越高，五级卡着 50 利息慢 D 三星。<b>七野怪凑满之前不要上高费</b>——野怪 7 档是这套的强度来源。三星苍蓝哨戒出来再上人口。',
+    pos:'远古石甲虫顶最前面正中（反甲狂徒龙爪，扛最多的火力），苍蓝雕纹魔像和峡谷迅捷蟹分列两侧，深红锋喙鸟和远古巨龙压第二排。苍蓝哨戒沉底最远角，她的大招是全场范围，站得越远越安全。绯红树怪在她侧后补输出。',
+    mistakes:['把纳尔当野怪凑数——他不带峡谷野怪，七个位置要留给真正的野怪单位','一费三星没出来就上人口，牌池被摊薄，再想追三要多花一倍钱','把蓝霸符给别人——苍蓝哨戒没有蓝霸符就是废的'],
+    giveUp:'3-5 之后苍蓝哨戒还差三张以上，说明这局牌池不给。六野怪已经成型就别硬凑第七个，把远古巨龙的三件转给绯红树怪打双输出，或者直接转常规运营保前四。',
+    pivot:[['elise','同样靠重装前排撑场，法系装能接']],
+    units:[
+      {n:'远古石甲虫',id:null,c:3,r:'主坦',row:0,t:['峡谷野怪','斗士'],it:[{n:'荆棘之甲',k:'def'},{n:'狂徒铠甲',k:'def'},{n:'龙爪',k:'def'}],
+       alt:[['苍蓝雕纹魔像','四费前排更肉，但野怪位会换人'],['任意二费重装','坦度掉一档，还能撑']]},
+      {n:'苍蓝雕纹魔像',id:null,c:4,r:'前排',row:0,t:['峡谷野怪','重装战士','神谕'],it:[{n:'肉装',k:'def'}],
+       alt:[['绯红印记树怪','同为野怪位，少一条重装'],['任意四费前排','野怪数量会掉']]},
+      {n:'峡谷迅捷蟹',id:null,c:2,r:'前排',row:0,t:['峡谷野怪','主宰'],it:[{n:'肉装',k:'def'}],
+       alt:[['任意二费前排','野怪位，凑数用'],['深红锋喙鸟','同为野怪，费用更低']]},
+      {n:'纳尔',id:'Gnar',c:5,r:'补位',row:0,t:['永恒之森','约德尔人和朋友','斗士'],it:[{n:'肉装',k:'def'}],
+       alt:[['任意三费前排','斗士二档会掉'],['不上','七野怪齐了之后这个位置本来就是灵活的']]},
+      {n:'塔里克',id:'Taric',c:5,r:'前排',row:0,t:['宝石骑士','重装战士'],it:[{n:'翡翠配对',k:'util'}],
+       alt:[['任意五费前排','宝石骑士只有一档，掉了不影响骨架'],['阿木木','四费前排，肉装继承']]},
+      {n:'深红锋喙鸟',id:null,c:3,r:'功能',row:1,t:['峡谷野怪','召唤师','迅捷射手'],it:[{n:'纯挂件',k:'util'}],
+       alt:[['深红锋喙鸟','同为野怪，神谕会掉'],['留着','野怪数量就是强度，别为了换而换']]},
+      {n:'绯红树怪',id:null,c:1,r:'副 C',row:1,t:['峡谷野怪','猎人'],it:[{n:'青龙刀',k:'util'},{n:'无尽之刃',k:'ad'},{n:'鬼索的狂暴之刃',k:'util'}],
+       alt:[['远古巨龙','五费物理，三件直接给'],['任意野怪位','输出会掉一档']]},
+      {n:'远古巨龙',id:null,c:5,r:'副 C',row:1,t:['顶级掠食者','峡谷野怪'],it:[{n:'物理装',k:'ad'}],
+       alt:[['绯红树怪','把无尽羊刀集中给他，转单核'],['任意五费','顶级掠食者只有一档']]},
+      {n:'苍蓝哨戒',id:null,c:1,r:'主 C',row:1,carry:1,t:['峡谷野怪','神谕'],it:[{n:'蓝霸符',k:'util'},{n:'珠光护手',k:'ap'},{n:'灭世者的死亡之帽',k:'ap'}],
+       alt:[['绯红树怪','转物理单核，但蓝霸符就废了'],['转黑暗仪式伊莉丝','法系装能接，前排换成六重装']]}
+    ]
+  },
+  {
+    id:'varus', name:'日月双蚀韦鲁斯', tier:'A', style:'一费赌狗',
+    code:'',
+    traits:[['日蚀骑士',3],['月蚀骑士',3],['迅捷射手',3],['地狱火',3],['狂战士',2],['护卫',2]],
+    flow:'<b>2-1 上 4、2-5 上 5</b>，前期不追人不漏经济。抢攻速和大剑——韦鲁斯要青龙刀、无尽、羊刀。<b>三级和四级搜一费</b>：韦鲁斯、蕾欧娜是这个窗口最容易三星的两张。<b>五级慢 D 三星韦鲁斯</b>，六、七级补凯尔、阿卡丽、厄斐琉斯。八级补拉露恩收尾。',
+    pos:'蕾欧娜、瑟庄妮、慎三个前排站第一排正中，黛安娜顶侧翼。韦鲁斯站最后排最远角——他的技能是按距离打最大目标，站角上能覆盖全场。凯尔在他侧翼，阿卡丽绕后切对面 C 位。',
+    mistakes:['青龙刀给凯尔——韦鲁斯没有青龙刀技能转不起来，整套输出腰斩','日蚀和月蚀混着上，结果两边都不到三档——这两条要分开凑满','把拉露恩当废物，她是第五张的五费补强'],
+    giveUp:'四阶段韦鲁斯还在两星，这套的输出曲线就断了。日蚀三档成型但韦鲁斯不三星，把凯尔的无尽羊刀转给她打双 C，或者直接转宝宝学院阿卡丽——日蚀骨架完全一样。',
+    pivot:[['akali','三张日蚀前排原样搬，装备换一下就能接'],['yunara','共享日蚀和追三节奏']],
+    units:[
+      {n:'蕾欧娜',id:'Leona',c:1,r:'主坦',row:0,t:['日蚀骑士','护卫'],it:[{n:'荆棘之甲',k:'def'},{n:'狂徒铠甲',k:'def'},{n:'龙爪',k:'def'}],
+       alt:[['瑟庄妮','二费前排，装备能用一半'],['任意一费前排','日蚀位会掉']]},
+      {n:'瑟庄妮',id:'Sejuani',c:2,r:'前排',row:0,t:['日蚀骑士','主宰'],it:[{n:'肉装',k:'def'}],
+       alt:[['慎','二费护卫，坦度接近'],['任意二费前排','日蚀位会掉']]},
+      {n:'慎',id:'Shen',c:2,r:'前排',row:0,t:['地狱火','护卫'],it:[{n:'肉装',k:'def'}],
+       alt:[['任意二费护卫','护卫二档会掉'],['阿木木','四费前排，更肉但费用高']]},
+      {n:'黛安娜',id:'Diana',c:3,r:'前排',row:0,t:['月蚀骑士','狂战士','重装战士'],it:[{n:'肉装',k:'def'}],
+       alt:[['赫卡里姆','三费前排，月蚀会掉一条'],['任意三费前排','月蚀档位会掉']]},
+      {n:'阿卡丽',id:'Akali',c:1,r:'切后排',row:1,t:['地狱火','魔战士','狂战士'],it:[{n:'珠光护手',k:'ap'},{n:'正义之手',k:'util'}],
+       alt:[['任意三费输出','切后排的能力会掉'],['不上','专注韦鲁斯单核，钱用来补前排']]},
+      {n:'凯尔',id:'Kayle',c:2,r:'副 C',row:1,t:['日蚀骑士','迅捷射手'],it:[{n:'鬼索的狂暴之刃',k:'util'},{n:'珠光护手',k:'ap'},{n:'灭世者的死亡之帽',k:'ap'}],
+       alt:[['厄斐琉斯','四费物理，装备换一半'],['任意二费法系','地狱火会掉']]},
+      {n:'厄斐琉斯',id:'Aphelios',c:4,r:'副 C',row:1,t:['月蚀骑士','迅捷射手'],it:[{n:'物理装',k:'ad'}],
+       alt:[['任意四费物理','迅捷射手会掉'],['不上','八人口前本来就不上']]},
+      {n:'韦鲁斯',id:'Varus',c:1,r:'主 C',row:1,carry:1,t:['地狱火','迅捷射手'],it:[{n:'青龙刀',k:'util'},{n:'无尽之刃',k:'ad'},{n:'鬼索的狂暴之刃',k:'util'}],
+       alt:[['转宝宝学院阿卡丽','日蚀骨架不变，C 换成阿卡丽'],['转裁决芸阿娜','同为日蚀系一费赌狗']]},
+      {n:'拉露恩',id:'Alune',c:5,r:'收尾',row:1,t:['月华神女','月蚀骑士','法师'],it:[{n:'来谁上谁',k:'util'}],
+       alt:[['任意五费','这个位置本来就灵活'],['不上','八人口满编就够打了']]}
+    ]
+  },
+  {
+    id:'akali', name:'宝宝学院阿卡丽', tier:'B', avg:4.64, top4:48.9, win:7.2, games:24838, style:'三费赌狗',
+    code:'',
+    traits:[['日蚀骑士',3],['地狱火',3],['狂战士',2],['迅捷射手',2],['护卫',2],['主宰',2]],
+    flow:'<b>2-1 上 4、2-5 上 5</b> 正常过渡，不追人不 D。<b>3-2 上 6 以后开始找阿卡丽</b>——她是三费，六级池子最舒服。<b>七级是最重要的窗口</b>，卡 50 利息慢 D 三星阿卡丽，顺带把卡蜜尔、韦鲁斯追到三星。奥恩四费，能二星就够用。',
+    pos:'奥恩单顶最前面正中——他挨的伤害越足，锻出的神器越快。蕾欧娜、瑟庄妮、阿木木分列两侧。阿卡丽站第二排偏侧，她是刺客型，要贴对面 C 位那一侧。韦鲁斯和凯尔沉底。',
+    mistakes:['给奥恩堆纯防装——他做任务要的是承伤，狂徒加双抗回复才是正解','阿卡丽站太后排，技能够不到人，等于没有这个 C','六级就把钱花光，七级的三费池才是阿卡丽的家'],
+    giveUp:'4-1 之后阿卡丽还不到两星，这套的输出完全跟不上。三张日蚀前排还在的话，直接转日月双蚀韦鲁斯——骨架一样，C 换成一费更容易成型。',
+    pivot:[['varus','日蚀三前排共享，一费 C 更好成型'],['karma','前排能复用，换成法系单核']],
+    units:[
+      {n:'奥恩',id:'Ornn',c:1,r:'主坦',row:0,t:['永恒之森','护卫'],it:[{n:'荆棘之甲',k:'def'},{n:'狂徒铠甲',k:'def'},{n:'龙爪',k:'def'}],
+       alt:[['阿木木','四费前排，装备继承但锻不出神器'],['任意四费前排','前排会薄一档']]},
+      {n:'蕾欧娜',id:'Leona',c:1,r:'前排',row:0,t:['日蚀骑士','护卫'],it:[{n:'肉装',k:'def'}],
+       alt:[['瑟庄妮','二费前排，日蚀位不变'],['任意一费前排','保住三个前排']]},
+      {n:'瑟庄妮',id:'Sejuani',c:2,r:'前排',row:0,t:['日蚀骑士','主宰'],it:[{n:'肉装',k:'def'}],
+       alt:[['慎','二费护卫，护卫二档能保住'],['任意二费前排','日蚀位会掉']]},
+      {n:'阿木木',id:'Amumu',c:4,r:'前排',row:0,t:['地狱火','主宰'],it:[{n:'肉装',k:'def'}],
+       alt:[['任意四费前排','主宰二档会掉'],['卡蜜尔','三费前排，便宜但薄']]},
+      {n:'卡蜜尔',id:'Camille',c:1,r:'副 C',row:1,t:['魔女','狂战士'],it:[{n:'无尽之刃',k:'ad'},{n:'斯特拉克的挑战护手',k:'ad'}],
+       alt:[['阿卡丽','把装备集中给她走单核'],['任意三费物理','副 C 位']]},
+      {n:'韦鲁斯',id:'Varus',c:1,r:'副 C',row:1,t:['地狱火','迅捷射手'],it:[{n:'青龙刀',k:'util'},{n:'鬼索的狂暴之刃',k:'util'}],
+       alt:[['凯尔','同为低费输出，法系换物理'],['任意一费','日蚀和迅捷都会掉']]},
+      {n:'凯尔',id:'Kayle',c:2,r:'副 C',row:1,t:['日蚀骑士','迅捷射手'],it:[{n:'法系输出',k:'ap'}],
+       alt:[['韦鲁斯','物理换法系'],['任意二费法系','地狱火会掉']]},
+      {n:'阿卡丽',id:'Akali',c:1,r:'主 C',row:1,carry:1,t:['地狱火','魔战士','狂战士'],it:[{n:'珠光护手',k:'ap'},{n:'窃贼手套',k:'util'},{n:'正义之手',k:'util'}],
+       alt:[['转日月双蚀韦鲁斯','日蚀骨架不变，C 换成一费'],['卡蜜尔','物理线，装备完全不同']]}
+    ]
+  },
+  {
+    id:'elise', name:'黑暗仪式伊莉丝', tier:'B', avg:4.69, top4:45.7, win:19.9, games:16866, style:'六人口追三',
+    code:'',
+    traits:[['重装战士',6],['魔女',3],['月蚀骑士',2]],
+    flow:'<b>必须先拿到「黑暗仪式」海克斯，没有就别玩</b>——拿到之后开局白给卡蜜尔、伊莉丝、凯特琳，魔女不再换战利品而是直接堆法强。<b>二阶段凑 3~4 魔女走连败攒钱</b>。<b>3-2 上 6 慢 D 三星伊莉丝</b>，顺带追蛇女。抽到魔女拉克丝可以上场开 7 魔女拿奖励。',
+    pos:'苍蓝雕纹魔像放最前排正中扛全部爆发，赫卡里姆、黛安娜、塔里克站前排分摊。伊莉丝放前排侧位——她要贴脸才能叠起来。莫甘娜、洛放中排打控制，拉露恩、卡西奥佩娅缩最后排底角。',
+    mistakes:['没有黑暗仪式硬玩——直接老八出局，这是最贵的错误','把伊莉丝放后排，她是近战法系，站远了技能打不到','六重装凑满了却不上，重装 6 档才是这套的坦度来源'],
+    giveUp:'3-2 之后伊莉丝还差三张、或者海克斯压根没出黑暗仪式，这套就别硬冲。六重装前排本身够肉，转主宰婕拉或者七野怪红蓝都能接。',
+    pivot:[['zyra','六个前排原样能用，法系装直接转'],['riftblue','同样吃重装和野怪前排']],
+    units:[
+      {n:'苍蓝雕纹魔像',id:null,c:4,r:'主坦',row:0,t:['峡谷野怪','重装战士','神谕'],it:[{n:'石像鬼石板甲',k:'def'},{n:'狂徒铠甲',k:'def'},{n:'振奋盔甲',k:'def'}],
+       alt:[['赫卡里姆','三费重装，坦度掉一档'],['阿木木','四费前排，重装位不变']]},
+      {n:'赫卡里姆',id:'Hecarim',c:3,r:'前排',row:0,t:['永恒之森','重装战士'],it:[{n:'肉装',k:'def'}],
+       alt:[['黛安娜','同费用重装'],['任意三费重装','六重装人数不能掉']]},
+      {n:'洛',id:'Rakan',c:1,r:'前排',row:0,t:['花仙子','主宰','重装战士'],it:[{n:'肉装',k:'def'}],
+       alt:[['任意二费重装','重装位，控制会掉'],['卡蜜尔','三费重装，更肉但贵']]},
+      {n:'黛安娜',id:'Diana',c:3,r:'前排',row:0,t:['月蚀骑士','狂战士','重装战士'],it:[{n:'肉装',k:'def'}],
+       alt:[['赫卡里姆','同费用重装'],['任意三费重装','六重装不能掉人']]},
+      {n:'塔里克',id:'Taric',c:5,r:'前排',row:0,t:['宝石骑士','重装战士'],it:[{n:'肉装',k:'def'}],
+       alt:[['卡蜜尔','三费重装，前排会薄但人数够'],['任意五费前排','重装位会掉']]},
+      {n:'卡蜜尔',id:'Camille',c:1,r:'前排',row:0,t:['魔女','狂战士'],it:[{n:'肉装',k:'def'}],
+       alt:[['赫卡里姆','同为重装，位置互换'],['任意三费重装','六重装人数必须凑满']]},
+      {n:'莫甘娜',id:'Morgana',c:4,r:'控制',row:1,t:['魔女','神谕'],it:[{n:'莫雷洛秘典',k:'ap'}],
+       alt:[['任意四费法系','控制会掉'],['不上','专心伊莉丝单核']]},
+      {n:'拉露恩',id:'Alune',c:5,r:'收尾',row:1,t:['月华神女','月蚀骑士','法师'],it:[{n:'法系装',k:'ap'}],
+       alt:[['厄斐琉斯','同为月蚀骑士，物理线'],['不上','九人口满编，钱留着补二星']]},
+      {n:'卡西奥佩娅',id:'Cassiopeia',c:3,r:'副 C',row:1,t:['魔女','法师'],it:[{n:'法系输出',k:'ap'}],
+       alt:[['任意四费法系','魔女档位会掉'],['不上','专注伊莉丝']]},
+      {n:'伊莉丝',id:'Elise',c:2,r:'主 C',row:1,carry:1,t:['魔女','重装战士'],it:[{n:'珠光护手',k:'ap'},{n:'灭世者的死亡之帽',k:'ap'},{n:'海克斯科技枪刃',k:'ap'}],
+       alt:[['转主宰婕拉','六前排原样搬，法系装能接'],['卡西奥佩娅','副 C 顶上来，但伤害差一档']]}
+    ]
+  },
+  {
+    id:'karma', name:'永恒之森卡尔玛', tier:'S', style:'一费赌狗',
+    code:'',
+    traits:[['永恒之森',5],['法师',4],['灵魂莲华',2],['护卫',2],['斗士',2],['自然之力！大元素使',1]],
+    flow:'<b>前期不拉人口，只留体系牌</b>，胆大的直接五连败进野怪把经济做满。<b>打完野怪大 D 三星卡尔玛和三星奥恩</b>——这两个是这套唯一的核心，双三星就位中期直接走连胜。<b>牌不顺先保二星稳血</b>，绝不乱 D 崩经济。双三星之后存钱拉人口：六补乐芙兰、七补费德提克、八补二星阿狸和瑟提。血线健康就上九补纳尔、艾翁、茂凯。',
+    pos:'奥恩单顶最前排正中——他每格挡够伤害就锻一件神器，站得越靠前锻得越快。卡尔玛在最远角，她的大招是持续伤害接小范围爆炸加攻速削弱，站角才能覆盖全场。阿狸和瑟提在中排补控制和肉。',
+    mistakes:['奥恩给纯输出装——他要的是狂徒、板甲、绿甲三件，血厚双抗高回复快，神器锻得才快','卡尔玛没蓝霸符，技能转不起来','双三星没到位就上人口，牌池被摊薄，追三要多花一倍钱'],
+    giveUp:'3-5 之后卡尔玛或奥恩差三张以上，说明这局牌池不给你。把法系装转给阿狸，走常规八人口运营保前四，别硬赌。',
+    pivot:[['yunara','同为一费追三慢节奏，转过去打法不变'],['ahri','法系装和法师骨架能接']],
+    units:[
+      {n:'奥恩',id:'Ornn',c:1,r:'主坦',row:0,t:['永恒之森','护卫'],it:[{n:'狂徒铠甲',k:'def'},{n:'石像鬼石板甲',k:'def'},{n:'振奋盔甲',k:'def'}],
+       alt:[['瑟提','四费前排，肉装继承但锻不出神器'],['任意四费前排','前排会薄一档']]},
+      {n:'瑟提',id:'Sett',c:4,r:'前排',row:0,t:['灵魂莲华','斗士'],it:[{n:'肉装',k:'def'}],
+       alt:[['任意四费前排','斗士二档会掉'],['牛头','四费前排，护卫能保住']]},
+      {n:'阿利斯塔',id:'Alistar',c:2,r:'前排',row:0,t:['永恒之森','斗士'],it:[{n:'肉装',k:'def'}],
+       alt:[['瑟提','同为斗士前排'],['任意四费前排','护卫二档会掉']]},
+      {n:'费德提克',id:'Fiddlesticks',c:3,r:'控制',row:1,t:['绝命花妖','护卫','法师'],it:[{n:'法系装',k:'ap'}],
+       alt:[['任意四费法系','永恒之森档位会掉'],['不上','专心卡尔玛单核']]},
+      {n:'阿狸',id:'Ahri',c:4,r:'副 C',row:1,t:['灵魂莲华','法师'],it:[{n:'法系输出',k:'ap'}],
+       alt:[['任意四费法系','灵魂莲华会掉'],['不上','八人口前本来就不上']]},
+      {n:'拉克丝 (永恒之森)',id:'Lux',c:5,r:'副 C',row:1,t:['永恒之森','自然之力！大元素使'],it:[{n:'法系输出',k:'ap'}],
+       alt:[['任意四费法系','永恒之森五档会掉，整套强度腰斩'],['留着','她是五档里最关键的一张']]},
+      {n:'乐芙兰',id:'LeBlanc',c:2,r:'补位',row:1,t:['永恒之森','法师'],it:[{n:'法系装',k:'ap'}],
+       alt:[['任意二费法师','永恒之森和法师都会掉各一条'],['霞','一费永恒之森，凑五档的备选']]},
+      {n:'赫卡里姆',id:'Hecarim',c:3,r:'前排',row:0,t:['永恒之森','重装战士'],it:[{n:'肉装',k:'def'}],
+       alt:[['纳尔','同为永恒之森，斗士档会变'],['任意三费前排','永恒之森五档会掉']]},
+      {n:'卡尔玛',id:'Karma',c:1,r:'主 C',row:1,carry:1,t:['灵魂莲华','法师'],it:[{n:'大天使之杖',k:'ap'},{n:'珠光护手',k:'ap'},{n:'蓝霸符',k:'util'}],
+       alt:[['转日蚀芸阿娜','同为慢节奏一费追三，换套牌打法不变'],['转神谕阿狸','法系装全能用，走八人口运营']]}
+    ]
+  },
+  {
+    id:'xiakayle', name:'日蚀霞凯尔', tier:'C', avg:4.81, top4:44.8, win:11.1, games:17844, style:'六人口三个三',
+    code:'0241142041f42740340a439000000000TFTSet18',
+    traits:[['日蚀骑士',3],['永恒之森',3],['护卫',2],['花仙子',2],['主宰',2],['迅捷射手',2],['重装战士',2]],
+    flow:'<b>2-1 拿洛、霞、凯尔、瑟庄妮</b>四张，开局就是终局的样子。<b>3-2 上六开搜</b>，目标霞、蕾欧娜、凯尔三个三星——统计站模型约 89 抽（178 金）三张全出。<b>先保霞</b>（三星率 77% 是底线），蕾欧娜 74%、凯尔 66%，两张二星也能先顶着打。三星到手就停手，六人口二星一星混着摆都能赢两轮。五阶段血量健康上七挂赫卡里姆，八人口补伊莉丝和乐芙兰。',
+    pos:'蕾欧娜、洛、奥恩、瑟庄妮一字排开顶第一排，蕾欧娜和洛居中；赫卡里姆站第二排靠前吃第一波伤害；凯尔站第二排两翼输出，霞沉底中间——羽刃弹幕要拉开距离，凯尔的焰浪呈扇形，站位越靠边扫得越宽。防钩：凯尔和霞分开站两个角，别让对面一个技能端掉双 C。',
+    mistakes:['六人口就把钱花光去追第四张三星——三个三就是毕业线','把杀人剑先合了再考虑海妖，实测海妖先合名次更好','两家以上亮了三星还硬追一费卡'],
+    giveUp:'3-2 上六抽完第一轮 35 金，霞还不到六张就跑；二阶段连败超过四轮还没见到第二张瑟庄妮，前排二星都凑不齐的局，后排追到三星也站不住。',
+    pivot:[['aphelios','物理装直接继承，改成八人口运营']],
+    units:[
+      {n:'霞',id:'Xayah',c:1,r:'主 C',row:1,t:['永恒之森','花仙子','迅捷射手'],it:[{n:'死亡之刃',k:'ad'},{n:'鬼索的狂暴之刃',k:'util'},{n:'海妖之怒',k:'ad'}],
+       alt:[['厄斐琉斯','同为物理后排，三件直接给']],carry:1},
+      {n:'凯尔',id:'Kayle',c:2,r:'副 C',row:1,t:['日蚀骑士','迅捷射手'],it:[{n:'鬼索的狂暴之刃',k:'util'},{n:'珠光护手',k:'ap'},{n:'海克斯科技枪刃',k:'ap'}],
+       alt:[['韦鲁斯','法术装能用，换迅捷射手线']]},
+      {n:'蕾欧娜',id:'Leona',c:1,r:'前排',row:0,t:['日蚀骑士','护卫'],it:[{n:'肉装',k:'def'}],
+       alt:[['慎','同为低费护卫，肉装继承']]},
+      {n:'洛',id:'Rakan',c:1,r:'主坦',row:0,t:['花仙子','主宰','重装战士'],it:[{n:'石像鬼石板甲',k:'def'},{n:'圣盾使的誓约',k:'def'},{n:'振奋盔甲',k:'def'}],
+       alt:[['奥恩','自带神器，前排照样顶']]},
+      {n:'瑟庄妮',id:'Sejuani',c:2,r:'前排',row:0,t:['日蚀骑士','主宰'],it:[{n:'石像鬼石板甲',k:'def'},{n:'振奋盔甲',k:'def'}],
+       alt:[['阿木木','四费前排，肉装直接继承']]},
+      {n:'赫卡里姆',id:'Hecarim',c:3,r:'前排',row:0,t:['永恒之森','重装战士'],it:[{n:'肉装',k:'def'}],
+       alt:[['塔里克','五费前排，硬度更高']]},
+      {n:'奥恩',id:'Ornn',c:1,r:'功能',row:0,t:['永恒之森','护卫'],it:[{n:'肉装',k:'def'}],
+       alt:[['任意低费前排','奥恩的价值在自带神器']]}
+    ]
+  },
+  {
+    id:'kaylesniper', name:'迅捷射手凯尔', tier:'A', avg:4.36, top4:52.8, win:12.0, games:8083, style:'六级停手搜三',
+    code:'0241142b4273ed3fa43540a3ef000000TFTSet18',
+    traits:[['日蚀骑士',3],['迅捷射手',3],['地狱火',3],['护卫',2],['月蚀骑士',2],['主宰',2]],
+    flow:'<b>六级停手开搜</b>，只追凯尔、瑟庄妮、韦鲁斯三张低费，四费的阿木木和厄斐琉斯别碰。<b>纹章优先给黛安娜</b>，不是给主 C——她身上狂战士、重装战士两条都是「计数 1、断点从 2 起」的死档，一枚纹章能把两条同时点亮。攒够钱再补到八人。',
+    pos:'瑟庄妮、蕾欧娜、阿木木、慎顶第一排；凯尔后排中央，韦鲁斯和厄斐琉斯分列两侧拉开距离；黛安娜贴前排站位，吃狂战士的全能吸血。',
+    mistakes:['把纹章塞给凯尔去升迅捷射手——实测名次反而变差','六级别硬搜到空，血量健康再上人口','四费卡追三，钱花在错的地方'],
+    giveUp:'六人口搜完两轮凯尔还不到六张就转；前排二星凑不齐的局不要硬撑。',
+    pivot:[['varus','日月双蚀体系，物理法术装都能用']],
+    units:[
+      {n:'凯尔',id:'Kayle',c:2,r:'主 C',row:1,t:['日蚀骑士','迅捷射手'],it:[{n:'鬼索的狂暴之刃',k:'util'},{n:'无尽之刃',k:'ad'},{n:'海妖之怒',k:'ad'}],
+       alt:[['霞','同为迅捷射手，物理装继承']],carry:1},
+      {n:'韦鲁斯',id:'Varus',c:1,r:'副 C',row:1,t:['地狱火','迅捷射手'],it:[{n:'无尽之刃',k:'ad'},{n:'最后的轻语',k:'ad'}],
+       alt:[['厄斐琉斯','四费迅捷，装能用但要重排']]},
+      {n:'厄斐琉斯',id:'Aphelios',c:4,r:'副 C',row:1,t:['月蚀骑士','迅捷射手'],it:[{n:'鬼索的狂暴之刃',k:'util'},{n:'海妖之怒',k:'ad'}],
+       alt:[['霞','低费替代，前期更好成型']]},
+      {n:'瑟庄妮',id:'Sejuani',c:2,r:'主坦',row:0,t:['日蚀骑士','主宰'],it:[{n:'石像鬼石板甲',k:'def'},{n:'振奋盔甲',k:'def'}],
+       alt:[['阿木木','四费前排，肉装继承']]},
+      {n:'蕾欧娜',id:'Leona',c:1,r:'前排',row:0,t:['日蚀骑士','护卫'],it:[{n:'肉装',k:'def'}],
+       alt:[['慎','同为护卫，顺便补地狱火']]},
+      {n:'阿木木',id:'Amumu',c:4,r:'前排',row:0,t:['地狱火','主宰'],it:[{n:'石像鬼石板甲',k:'def'}],
+       alt:[['瑟庄妮','主宰位互换']]},
+      {n:'慎',id:'Shen',c:2,r:'前排',row:0,t:['地狱火','护卫'],it:[{n:'肉装',k:'def'}],
+       alt:[['蕾欧娜','护卫位互换']]},
+      {n:'黛安娜',id:'Diana',c:3,r:'功能',row:0,t:['月蚀骑士','狂战士','重装战士'],it:[{n:'狂战士纹章',k:'emblem'}],
+       alt:[['卡蜜尔','低费狂战士，但吃不到月蚀']]}
+    ]
+  },
+  {
+    id:'kogmaw', name:'神谕大嘴克格莫', tier:'A', style:'八人口慢运营',
+    code:'',
+    traits:[['神谕',5],['峡谷野怪',3],['斗士',2],['重装战士',2]],
+    flow:'<b>前期用低费神谕棋子过渡</b>，存钱拉人口，别在四人口乱搜。<b>7 级 D 出三星克格莫</b>，前排优先三星赫卡里姆。前排坦度拉满之后，大嘴可以在后排持续叠加输出，克制大部分近战突进阵容。',
+    pos:'赫卡里姆、苍蓝雕纹魔像、远古石甲虫、阿利斯塔顶第一排吃伤害；克格莫沉底正中，莫甘娜放他侧后方补控制；苍蓝哨戒贴前排边缘，别让刺客直接跳到主 C 脸上。',
+    mistakes:['前期为了凑神谕五档硬拉人口，经济崩掉','主 C 追不到三就急着转，其实二星也能打','法师装堆给提莫，他在这套里是功能位'],
+    giveUp:'七级搜完两轮克格莫不到六张，转神谕阿狸（法装通用）；前排三星赫卡里姆一直不出、血量见底，也要考虑走。',
+    pivot:[['ahri','同为神谕体系，法术装改给阿狸']],
+    units:[
+      {n:'克格莫',id:'KogMaw',c:3,r:'主 C',row:1,t:['帝王斑蝶','魔战士','神谕'],it:[{n:'鬼索的狂暴之刃',k:'util'},{n:'无尽之刃',k:'ad'},{n:'最后的轻语',k:'ad'}],
+       alt:[['阿狸','法系主 C，装要重做']],carry:1},
+      {n:'莫甘娜',id:'Morgana',c:4,r:'副 C',row:1,t:['魔女','神谕'],it:[{n:'灭世者的死亡之帽',k:'ap'},{n:'虚空之杖',k:'ap'},{n:'莫雷洛秘典',k:'ap'}],
+       alt:[['阿狸','同为四费法师，装直接继承']]},
+      {n:'提莫',id:'Teemo',c:2,r:'功能',row:1,t:['约德尔人和朋友','神谕'],it:[{n:'神谕纹章',k:'emblem'}],
+       alt:[['卡尔玛','低费法师，前期过渡用']]},
+      {n:'苍蓝哨戒',id:null,c:1,r:'前排',row:0,t:['峡谷野怪','神谕'],it:[{n:'肉装',k:'def'}],
+       alt:[['魔沼蛙','同为低费野怪，凑峡谷二档']]},
+      {n:'苍蓝雕纹魔像',id:null,c:4,r:'主坦',row:0,t:['峡谷野怪','重装战士','神谕'],it:[{n:'石像鬼石板甲',k:'def'},{n:'狂徒铠甲',k:'def'}],
+       alt:[['绯红印记树怪','同为野怪，印记照样给']]},
+      {n:'远古石甲虫',id:null,c:3,r:'前排',row:0,t:['峡谷野怪','斗士'],it:[{n:'肉装',k:'def'}],
+       alt:[['峡谷迅捷蟹','二费野怪，凑峡谷三档']]},
+      {n:'赫卡里姆',id:'Hecarim',c:3,r:'前排',row:0,t:['永恒之森','重装战士'],it:[{n:'石像鬼石板甲',k:'def'},{n:'振奋盔甲',k:'def'}],
+       alt:[['塔里克','五费前排，硬度更高']]},
+      {n:'阿利斯塔',id:'Alistar',c:2,r:'前排',row:0,t:['永恒之森','斗士'],it:[{n:'肉装',k:'def'}],
+       alt:[['可酷伯','低费斗士，凑斗士二档']]}
+    ]
+  },
+  {
+    id:'khazix', name:'六荆棘裁决螳螂', tier:'S', style:'九人口爆发',
+    code:'',
+    traits:[['黑荆棘',6],['裁决使',3],['召唤师',1]],
+    flow:'<b>2 阶段保血</b>，别为了连胜把经济花光。<b>6 级 D 牌找三星卡兹克</b>，搭配黑荆棘羁绊，利用羁绊减伤提高生存。螳螂成型后一刀带走后排，专门克制版本扎堆的后排输出体系。九人口补满六黑荆棘，法装给阿兹尔打群体伤害。',
+    pos:'墨菲特、雷克塞、沃里克顶第一排；卡兹克站第二排侧翼，绕开对面坦克直接切后排；阿兹尔、拉克丝、索拉卡沉底，伊泽瑞尔和维迦站第二排补伤害。对面有钩子就把卡兹克和法师分开站。',
+    mistakes:['主 C 卡兹克追不到三就硬摆，其实二星切后排也够用','把法装堆给维迦，他在这是功能位','为了第七张黑荆棘硬拉人口导致前排全是二星'],
+    giveUp:'六级别搜完卡兹克不到六张就转；对面清一色高护甲前排（重装战士体系）时螳螂切入收益低，考虑换法师主 C。',
+    pivot:[['zyra','黑荆棘思路共通，法装沿用']],
+    units:[
+      {n:'卡兹克',id:'KhaZix',c:3,r:'主 C',row:1,t:['宿敌'],it:[{n:'无尽之刃',k:'ad'},{n:'最后的轻语',k:'ad'},{n:'夜之锋刃',k:'def'}],
+       alt:[['雷恩加尔','同为宿敌，切入思路一致']],carry:1},
+      {n:'墨菲特',id:'Malphite',c:4,r:'主坦',row:0,t:['黑荆棘','魔岩巨兽'],it:[{n:'石像鬼石板甲',k:'def'},{n:'狂徒铠甲',k:'def'},{n:'振奋盔甲',k:'def'}],
+       alt:[['阿木木','四费前排，肉装继承']]},
+      {n:'阿兹尔',id:'Azir',c:3,r:'副 C',row:1,t:['黑荆棘','裁决使','召唤师'],it:[{n:'灭世者的死亡之帽',k:'ap'},{n:'青龙刀',k:'util'}],
+       alt:[['索拉卡','同为裁决使，法装能用']]},
+      {n:'拉克丝 (黑荆棘)',id:'Lux',c:5,r:'副 C',row:1,t:['黑荆棘','自然之力！大元素使'],it:[{n:'灭世者的死亡之帽',k:'ap'},{n:'虚空之杖',k:'ap'}],
+       alt:[['阿狸','四费法师，装直接继承']]},
+      {n:'索拉卡',id:'Soraka',c:4,r:'功能',row:1,t:['绝命花妖','裁决使'],it:[{n:'莫雷洛秘典',k:'ap'}],
+       alt:[['伊泽瑞尔','同为裁决使，物理线']]},
+      {n:'伊泽瑞尔',id:'Ezreal',c:4,r:'副 C',row:1,t:['永恒之森','裁决使'],it:[{n:'无尽之刃',k:'ad'}],
+       alt:[['韦鲁斯','低费替代，前期更好出']]},
+      {n:'维迦',id:'Veigar',c:1,r:'功能',row:1,t:['黑荆棘','约德尔人和朋友','法师'],it:[{n:'蓝霸符',k:'util'}],
+       alt:[['乐芙兰','同为低费法师']]},
+      {n:'雷克塞',id:'RekSai',c:1,r:'前排',row:0,t:['黑荆棘','斗士'],it:[{n:'肉装',k:'def'}],
+       alt:[['可酷伯','同为低费斗士']]},
+      {n:'沃里克',id:'Warwick',c:2,r:'前排',row:0,t:['黑荆棘','狂战士'],it:[{n:'肉装',k:'def'}],
+       alt:[['卡蜜尔','低费狂战士，凑前排人数']]}
+    ]
+  },
+  {
+    id:'kaylesolar', name:'日月双蚀登神天使', tier:'A', style:'九人口慢热',
+    code:'',
+    traits:[['日蚀骑士',3],['月蚀骑士',3],['迅捷射手',3],['地狱火',3],['护卫',2],['主宰',2]],
+    flow:'<b>前期走连败保经济</b>，凯尔是慢热大核，叠满被动之后伤害质变。<b>拉到 8 人口找凯尔和拉露恩</b>，优先凑齐日月双蚀。羊刀加珠光护手是核心，凯尔没羊刀就换大天使。',
+    pos:'瑟庄妮、蕾欧娜、慎、阿木木顶第一排，慎和蕾欧娜居中吃第一波；凯尔站第二排两翼（焰浪扇形，越靠边扫得越宽）；拉露恩、厄斐琉斯、韦鲁斯沉底拉开；黛安娜贴前排。防钩：三个后排分开站三个角。',
+    mistakes:['前期为了保血硬买二星，凯尔没有装备等于没核','把羊刀给厄斐琉斯，凯尔叠不满被动','五阶段之前上九，钱不够把主 C 二星补完'],
+    giveUp:'八人口搜完两轮凯尔不到四张就转；血量低于 25 还硬憋三星就是接第八。',
+    pivot:[['varus','同日月双蚀，主 C 换韦鲁斯']],
+    units:[
+      {n:'凯尔',id:'Kayle',c:2,r:'主 C',row:1,t:['日蚀骑士','迅捷射手'],it:[{n:'鬼索的狂暴之刃',k:'util'},{n:'珠光护手',k:'ap'},{n:'海克斯科技枪刃',k:'ap'}],
+       alt:[['厄斐琉斯','物理线主 C，装要重做']],carry:1},
+      {n:'拉露恩',id:'Alune',c:5,r:'副 C',row:1,t:['月华神女','月蚀骑士','法师'],it:[{n:'灭世者的死亡之帽',k:'ap'},{n:'虚空之杖',k:'ap'}],
+       alt:[['阿狸','四费法师，装能用']]},
+      {n:'厄斐琉斯',id:'Aphelios',c:4,r:'副 C',row:1,t:['月蚀骑士','迅捷射手'],it:[{n:'鬼索的狂暴之刃',k:'util'},{n:'海妖之怒',k:'ad'}],
+       alt:[['霞','低费迅捷，前期过渡']]},
+      {n:'韦鲁斯',id:'Varus',c:1,r:'副 C',row:1,t:['地狱火','迅捷射手'],it:[{n:'无尽之刃',k:'ad'},{n:'最后的轻语',k:'ad'}],
+       alt:[['霞','同为低费迅捷射手']]},
+      {n:'瑟庄妮',id:'Sejuani',c:2,r:'主坦',row:0,t:['日蚀骑士','主宰'],it:[{n:'石像鬼石板甲',k:'def'},{n:'振奋盔甲',k:'def'}],
+       alt:[['阿木木','四费前排，肉装继承']]},
+      {n:'蕾欧娜',id:'Leona',c:1,r:'前排',row:0,t:['日蚀骑士','护卫'],it:[{n:'肉装',k:'def'}],
+       alt:[['慎','护卫位互换']]},
+      {n:'慎',id:'Shen',c:2,r:'前排',row:0,t:['地狱火','护卫'],it:[{n:'肉装',k:'def'}],
+       alt:[['蕾欧娜','护卫位互换']]},
+      {n:'阿木木',id:'Amumu',c:4,r:'前排',row:0,t:['地狱火','主宰'],it:[{n:'石像鬼石板甲',k:'def'}],
+       alt:[['瑟庄妮','主宰位互换']]},
+      {n:'黛安娜',id:'Diana',c:3,r:'功能',row:0,t:['月蚀骑士','狂战士','重装战士'],it:[{n:'狂战士纹章',k:'emblem'}],
+       alt:[['卡蜜尔','低费狂战士']]}
+    ]
+  },
+  {
+    id:'cassio', name:'六护卫蛇女', tier:'B', avg:4.51, top4:50.0, win:8.8, games:15904, style:'八人口慢运营',
+    code:'',
+    traits:[['护卫',6],['法师',3]],
+    flow:'<b>前期用护卫棋子顶血量</b>，护卫六档给全队加护盾和护甲，前排越厚蛇女越安全。<b>七级 D 出卡西奥佩娅</b>，四费阿狸补第二个法系输出。八人口把护卫六档拉满就成型，不用强上九。',
+    pos:'奥恩、蕾欧娜、慎、拉莫斯、费德提克、莉莉娅六个护卫全部顶第一排，奥恩居中；卡西奥佩娅和阿狸沉底最角落，别让刺客摸到。',
+    mistakes:['为了凑法师三档拆掉护卫，前排一薄蛇女立刻蒸发','蓝霸符给阿狸，蛇女才是主 C','八人口之后还硬上九，这套九人口没收益'],
+    giveUp:'七级搜完两轮蛇女不到四张就转；对面全是真伤或穿盾体系时六护卫收益大打折扣。',
+    pivot:[['ahri','法师装通用，改打神谕体系']],
+    units:[
+      {n:'卡西奥佩娅',id:'Cassiopeia',c:3,r:'主 C',row:1,t:['魔女','法师'],it:[{n:'蓝霸符',k:'util'},{n:'灭世者的死亡之帽',k:'ap'},{n:'大天使之杖',k:'ap'}],
+       alt:[['阿狸','同为法师主 C，装直接继承']],carry:1},
+      {n:'阿狸',id:'Ahri',c:4,r:'副 C',row:1,t:['灵魂莲华','法师'],it:[{n:'灭世者的死亡之帽',k:'ap'},{n:'虚空之杖',k:'ap'}],
+       alt:[['莫甘娜','四费法师，装能用']]},
+      {n:'奥恩',id:'Ornn',c:1,r:'主坦',row:0,t:['永恒之森','护卫'],it:[{n:'石像鬼石板甲',k:'def'},{n:'振奋盔甲',k:'def'}],
+       alt:[['瑟庄妮','主宰前排，肉装继承']]},
+      {n:'蕾欧娜',id:'Leona',c:1,r:'前排',row:0,t:['日蚀骑士','护卫'],it:[{n:'肉装',k:'def'}],
+       alt:[['洛','低费重装，硬度相当']]},
+      {n:'慎',id:'Shen',c:2,r:'前排',row:0,t:['地狱火','护卫'],it:[{n:'肉装',k:'def'}],
+       alt:[['阿木木','四费前排']]},
+      {n:'拉莫斯',id:'Rammus',c:3,r:'前排',row:0,t:['约德尔人和朋友','护卫'],it:[{n:'肉装',k:'def'}],
+       alt:[['可酷伯','低费斗士，凑前排人数']]},
+      {n:'费德提克',id:'Fiddlesticks',c:3,r:'前排',row:1,t:['绝命花妖','护卫','法师'],it:[{n:'莫雷洛秘典',k:'ap'}],
+       alt:[['乐芙兰','低费法师，凑法师三档']]},
+      {n:'莉莉娅',id:'Lillia',c:4,r:'前排',row:0,t:['花仙子','护卫'],it:[{n:'肉装',k:'def'}],
+       alt:[['塔里克','五费前排，更硬']]}
+    ]
+  }
+,
+  {
+    id:'xiaopao', name:'花仙小炮', tier:'C', avg:4.77, top4:44.3, win:12.3, games:19010, style:'七级慢 D · 5 阶段拉八补希维尔',
+    traits:[['花仙子',4],['约德尔人和朋友',3],['猎人',2],['野兽之灵',2],['主宰',2],['护卫',2],['重装战士',1],['斗士',1]],
+    flow:'<b>2-1 必抢反曲之弓</b>（鬼索、纹章、海妖、轻语、红霸符，这套弓吃六张）；抢不到弓就转金锅锅路线，迅捷射手纹章优先级反而最高；<b>3-2 到 4-1 拉七慢 D</b>（耐心是一种美德正对路，三星才是实的）；<b>5 阶段拉八</b>补希维尔，多余的钱追三星拉莫斯或给希维尔凑装。',
+    pos:'拉莫斯顶前排正中挨打，莉莉娅站他斜后方补盾回血，蔚和洛左右护法；小炮缩最后一排角落，希维尔隔一格站开防炸弹，可酷伯站第二排当约德尔骑乘位的备胎。',
+    mistakes:['纹章给霞——霞自带迅捷射手，纹章给谁都是 2 档，但小炮是主 C，攻速叠层直接换输出，纹章必须给小炮','花仙子纹章见就拿——花仙断点只有 2 和 4，四档满了再多一张纯浪费','弓不够硬玩——反曲之弓吃六张，2-1 抢不到就该转路线'],
+    giveUp:'① 四阶段慢 D 六七个回合小炮还差三张以上（有人同行或脸黑）；② 血量见底三星还没影——赌狗流没有翻盘第二幕；③ 场上两家以上抢小炮/拉莫斯。',
+    pivot:[['nidalee','蔚、希维尔、洛原样能用，转兽灵运营']],
+    units:[
+      {n:'拉莫斯',id:'Rammus',c:3,r:'主坦',row:0,t:['约德尔人和朋友','护卫'],it:[{n:'冕卫',k:'def'},{n:'石像鬼石板甲',k:'def'},{n:'狂徒铠甲',k:'def'}],
+       alt:[['追三星拉莫斯','多余的钱优先追他，主坦多一星全队多活三秒']]},
+      {n:'洛',id:'Rakan',c:1,r:'前排',row:0,t:['花仙子','主宰','重装战士'],it:[{n:'纯挂件',k:'util'}],
+       alt:[['别卖他','花仙四档的一份子，一人三条羁绊']]},
+      {n:'蔚',id:'Vi',c:3,r:'前排',row:0,t:['野兽之灵','主宰'],it:[{n:'纯挂件',k:'util'}],
+       alt:[['任意主宰前排','主宰二档会掉']]},
+      {n:'莉莉娅',id:'Lillia',c:4,r:'副坦',row:1,t:['花仙子','护卫'],it:[{n:'适应性头盔',k:'def'},{n:'圣盾使的誓约',k:'def'},{n:'振奋盔甲',k:'def'}],
+       alt:[['任意四费前排','花仙四档和护卫二档都会掉']]},
+      {n:'可酷伯',id:'Kobuko',c:1,r:'骑乘位',row:1,t:['约德尔人和朋友','斗士'],it:[{n:'纯挂件',k:'util'}],
+       alt:[['谁空给谁骑','约德尔骑乘备胎，不占装备']]},
+      {n:'霞',id:'Xayah',c:1,r:'打工 · 花仙',row:1,t:['永恒之森','花仙子','迅捷射手'],it:[{n:'纯挂件',k:'util'}],
+       alt:[['拉八换希维尔','五阶段希维尔顶她的位置，野兽之灵和猎人同时到位']]},
+      {n:'崔丝塔娜',id:'Tristana',c:3,r:'主 C',row:1,carry:1,t:['花仙子','约德尔人和朋友','猎人'],it:[{n:'鬼索的狂暴之刃',k:'ad'},{n:'迅捷射手纹章',k:'emblem'},{n:'海妖之怒',k:'ad'}],
+       alt:[['追三星小炮','七级慢 D 的全部意义；纹章给她开迅捷射手二档攻速叠加']]},
+      {n:'希维尔',id:'Sivir',c:4,r:'副 C',row:1,t:['野兽之灵','猎人'],it:[{n:'最后的轻语',k:'ad'},{n:'红霸符',k:'ad'},{n:'死亡之刃',k:'ad'}],
+       alt:[['五阶段再上','七级先不急，钱留给追小炮三星']]}
+    ]
+  }
+
+];
+
+/* ============================================================
+   工具
+   ============================================================ */
+const $ = id => document.getElementById(id);
+const COST_COLOR = {1:'var(--c1)',2:'var(--c2)',3:'var(--c3)',4:'var(--c4)',5:'var(--c5)'};
+const COST_NAME = {1:'一费',2:'二费',3:'三费',4:'四费',5:'五费'};
+const WEIGHT = {1:10, 2:11, 3:13, 4:16, 5:19};
+
+const IT_SHORT = {
+  '石像鬼石板甲':'石','狂徒铠甲':'狂','振奋盔甲':'振','荆棘之甲':'反','龙爪':'龙','肉装':'肉',
+  '圣盾使的誓约':'誓','无尽之刃':'无','最后的轻语':'语','强袭者的链枷':'链','鬼索的狂暴之刃':'羊',
+  '海妖之怒':'海','死亡之刃':'死','饮血剑':'饮','夜之锋刃':'夜','斯特拉克的挑战护手':'斯',
+  '红霸符':'红','蓝霸符':'蓝','青龙刀':'青','珠光护手':'珠','灭世者的死亡之帽':'帽','虚空之杖':'虚',
+  '莫雷洛秘典':'莫','大天使之杖':'天','海克斯科技枪刃':'枪','神谕纹章':'纹','窃贼手套':'窃',
+  '正义之手':'正','翡翠配对':'翡','翡翠配对 → 厄斐琉斯':'翡','适应性头盔':'适','羊刀':'羊',
+  '法系':'法','法系输出':'法','物理装':'物','物理 / 攻速':'物','按牌面补':'补','来谁上谁':'随',
+  '纯挂件':'—','种子位':'种','肉装 / 阿尔法印记':'印','功能装 / 种子位':'种'
+};
+
+/* S18 官方装备真实图标（cdragon/tft zh_cn → hexcore png，2026-11-10 逐条校验可用；翡翠配对为神器无官方图标，走文字兜底） */
+const ITEM_IMG = {
+  '死亡之刃':'https://raw.communitydragon.org/latest/game/assets/maps/tft/icons/items/hexcore/tft_item_deathblade.png',
+  '无尽之刃':'https://raw.communitydragon.org/latest/game/assets/maps/tft/icons/items/hexcore/tft_item_infinityedge.png',
+  '饮血剑':'https://raw.communitydragon.org/latest/game/assets/maps/tft/icons/items/hexcore/tft_item_bloodthirster.png',
+  '夜之锋刃':'https://raw.communitydragon.org/latest/game/assets/maps/tft/icons/items/hexcore/tft_item_guardianangel.png',
+  '斯特拉克的挑战护手':'https://raw.communitydragon.org/latest/game/assets/maps/tft/icons/items/hexcore/tft_item_steraksgage.png',
+  '鬼索的狂暴之刃':'https://raw.communitydragon.org/latest/game/assets/maps/tft/icons/items/hexcore/tft_item_guinsoosrageblade.png',
+  '海妖之怒':'https://raw.communitydragon.org/latest/game/assets/maps/tft/icons/items/hexcore/tft_item_krakenslayer.png',
+  '最后的轻语':'https://raw.communitydragon.org/latest/game/assets/maps/tft/icons/items/hexcore/tft_item_lastwhisper.png',
+  '红霸符':'https://raw.communitydragon.org/latest/game/assets/maps/tft/icons/items/hexcore/tft_item_rapidfirecannon.png',
+  '海克斯科技枪刃':'https://raw.communitydragon.org/latest/game/assets/maps/tft/icons/items/hexcore/tft_item_hextechgunblade.png',
+  '虚空之杖':'https://raw.communitydragon.org/latest/game/assets/maps/tft/icons/items/hexcore/tft_item_voidstaff.png',
+  '大天使之杖':'https://raw.communitydragon.org/latest/game/assets/maps/tft/icons/items/hexcore/tft_item_archangelsstaff.png',
+  '灭世者的死亡之帽':'https://raw.communitydragon.org/latest/game/assets/maps/tft/icons/items/hexcore/tft_item_rabadonsdeathcap.png',
+  '莫雷洛秘典':'https://raw.communitydragon.org/latest/game/assets/maps/tft/icons/items/hexcore/tft_item_morellonomicon.png',
+  '珠光护手':'https://raw.communitydragon.org/latest/game/assets/maps/tft/icons/items/hexcore/tft_item_jeweledgauntlet.png',
+  '石像鬼石板甲':'https://raw.communitydragon.org/latest/game/assets/maps/tft/icons/items/hexcore/tft_item_gargoylestoneplate.png',
+  '圣盾使的誓约':'https://raw.communitydragon.org/latest/game/assets/maps/tft/icons/items/hexcore/tft_item_frozenheart.png',
+  '棘刺背心':'https://raw.communitydragon.org/latest/game/assets/maps/tft/icons/items/hexcore/tft_item_bramblevest.png',
+  '巨龙之爪':'https://raw.communitydragon.org/latest/game/assets/maps/tft/icons/items/hexcore/tft_item_dragonsclaw.png',
+  '狂徒铠甲':'https://raw.communitydragon.org/latest/game/assets/maps/tft/icons/items/hexcore/tft_item_warmogsarmor.png',
+  '振奋盔甲':'https://raw.communitydragon.org/latest/game/assets/maps/tft/icons/items/hexcore/tft_item_spiritvisagerr.png',
+  '日炎斗篷':'https://raw.communitydragon.org/latest/game/assets/maps/tft/icons/items/hexcore/tft_item_redbuff.png',
+  '泰坦的坚决':'https://raw.communitydragon.org/latest/game/assets/maps/tft/icons/items/hexcore/tft_item_titansresolve.png',
+  '适应性头盔':'https://raw.communitydragon.org/latest/game/assets/maps/tft/icons/items/hexcore/tft_item_adaptivehelm.png',
+  '冕卫':'https://raw.communitydragon.org/latest/game/assets/maps/tft/icons/items/hexcore/tft_item_crownguard.png',
+  '朔极之矛':'https://raw.communitydragon.org/latest/game/assets/maps/tft/icons/items/hexcore/tft_item_spearofshojin.png',
+  '蓝霸符':'https://raw.communitydragon.org/latest/game/assets/maps/tft/icons/items/hexcore/tft_item_bluebuff.png',
+  '正义之手':'https://raw.communitydragon.org/latest/game/assets/maps/tft/icons/items/hexcore/tft_item_unstableconcoction.png',
+  '窃贼手套':'https://raw.communitydragon.org/latest/game/assets/maps/tft/icons/items/hexcore/tft_item_thiefsgloves.png',
+  '强袭者的链枷':'https://raw.communitydragon.org/latest/game/assets/maps/tft/icons/items/hexcore/tft_item_powergauntlet.png',
+  '裁决使纹章':'https://raw.communitydragon.org/latest/game/assets/maps/particles/tft/item_icons/traits/spatula/set14/tft14_emblem_executioner.png',
+  '迅捷射手纹章':'https://raw.communitydragon.org/latest/game/assets/maps/particles/tft/item_icons/traits/spatula/set14/tft14_emblem_rapidfire.png',
+  '斗士纹章':'https://raw.communitydragon.org/latest/game/assets/maps/particles/tft/item_icons/traits/spatula/set14/tft14_emblem_bruiser.png',
+  '黑荆棘纹章':'https://raw.communitydragon.org/latest/game/assets/maps/particles/tft/item_icons/traits/spatula/set18/tft18_emblem_blackthorn.png',
+  '灵魂莲华纹章':'https://raw.communitydragon.org/latest/game/assets/maps/particles/tft/item_icons/traits/spatula/set18/tft18_emblem_blossom.png',
+  '神谕纹章':'https://raw.communitydragon.org/latest/game/assets/maps/particles/tft/item_icons/traits/spatula/set18/tft18_emblem_invoker.png',
+  '狂战士纹章':'https://raw.communitydragon.org/latest/game/assets/maps/particles/tft/item_icons/traits/spatula/set17/tft17_emblem_marauder.png',
+  '暴风大剑':'https://raw.communitydragon.org/latest/game/assets/maps/tft/icons/items/hexcore/tft_item_bfsword.png',
+  '无用大棒':'https://raw.communitydragon.org/latest/game/assets/maps/tft/icons/items/hexcore/tft_item_needlesslylargerod.png',
+  '反曲之弓':'https://raw.communitydragon.org/latest/game/assets/maps/tft/icons/items/hexcore/tft_item_recurvebow.png',
+  '女神之泪':'https://raw.communitydragon.org/latest/game/assets/maps/tft/icons/items/hexcore/tft_item_tearofthegoddess.png',
+  '锁子甲':'https://raw.communitydragon.org/latest/game/assets/maps/tft/icons/items/hexcore/tft_item_chainvest.png',
+  '负极斗篷':'https://raw.communitydragon.org/latest/game/assets/maps/tft/icons/items/hexcore/tft_item_negatroncloak.png',
+  '巨人腰带':'https://raw.communitydragon.org/latest/game/assets/maps/tft/icons/items/hexcore/tft_item_giantsbelt.png',
+  '拳套':'https://raw.communitydragon.org/latest/game/assets/maps/tft/icons/items/hexcore/tft_item_sparringgloves.png',
+  '金铲铲':'https://raw.communitydragon.org/latest/game/assets/maps/tft/icons/items/hexcore/tft_item_spatula.png',
+  '金锅锅':'https://raw.communitydragon.org/latest/game/assets/maps/tft/icons/items/hexcore/tft_item_fryingpan.png',
+};77558
+
+/* 装备图标渲染：有官方图用真图，没有用文字兜底（自包含，两个脚本块都能用） */
+function itImgHTML(n){
+  const AL = {'青龙刀':'朔极之矛','龙爪':'巨龙之爪','荆棘之甲':'棘刺背心','羊刀':'鬼索的狂暴之刃','大帽':'灭世者的死亡之帽'};
+  const c = AL[n] || n;
+  const u = ITEM_IMG[c] || ITEM_IMG[n];
+  if(u) return '<img class="itimg" src="'+u+'" alt="'+c+'" loading="lazy" draggable="false">';
+  return IT_SHORT[c] || (BASE[c] ? BASE[c].s : c[0]);
+}
+
+/* S18 全量官方棋子头像（CommunityDragon tileIcon，2026-11-09 验证 74/74 可用） */
+const TFT_ICON = {
+  '魔沼蛙':'https://raw.communitydragon.org/latest/game/assets/characters/tft18_gromp/tft18_gromp_square.png',
+  '暗影狼':'https://raw.communitydragon.org/latest/game/assets/characters/tft18_murkwolf/tft18_murkwolf_square.png',
+  '苍蓝哨戒':'https://raw.communitydragon.org/latest/game/assets/characters/tft18_sentry/tft18_sentry_square.png',
+  '绯红树怪':'https://raw.communitydragon.org/latest/game/assets/characters/tft18_cinderling/tft18_cinderling_square.png',
+  '峡谷迅捷蟹':'https://raw.communitydragon.org/latest/game/assets/characters/tft18_scuttlecrab/tft18_scuttlecrab_square.png',
+  '远古石甲虫':'https://raw.communitydragon.org/latest/game/assets/characters/tft18_krug/tft18_krug_square.png',
+  '苍蓝雕纹魔像':'https://raw.communitydragon.org/latest/game/assets/characters/tft18_sentinel/tft18_sentinel_square.png',
+  '绯红印记树怪':'https://raw.communitydragon.org/latest/game/assets/characters/tft18_brambleback/tft18_brambleback_square.png',
+  '霞':'https://raw.communitydragon.org/latest/game/assets/characters/tft18_xayah/tft18_xayah_square.png',
+  '奥恩':'https://raw.communitydragon.org/latest/game/assets/characters/tft18_ornn/tft18_ornn_square.png',
+  '奈德丽':'https://raw.communitydragon.org/latest/game/assets/characters/tft18_nidalee/tft18_nidalee_square.png',
+  '赫卡里姆':'https://raw.communitydragon.org/latest/game/assets/characters/tft18_hecarim/tft18_hecarim_square.png',
+  '伊泽瑞尔':'https://raw.communitydragon.org/latest/game/assets/characters/tft18_ezreal/tft18_ezreal_square.png',
+  '阿兹尔':'https://raw.communitydragon.org/latest/game/assets/characters/tft18_azir/tft18_azir_square.png',
+  '雷克塞':'https://raw.communitydragon.org/latest/game/assets/characters/tft18_reksai/tft18_reksai_square.png',
+  '维迦':'https://raw.communitydragon.org/latest/game/assets/characters/tft18_veigar/tft18_veigar_square.png',
+  '茂凯':'https://raw.communitydragon.org/latest/game/assets/characters/tft18_maokai/tft18_maokai_square.png',
+  '墨菲特':'https://raw.communitydragon.org/latest/game/assets/characters/tft18_malphite/tft18_malphite_square.png',
+  '约里克':'https://raw.communitydragon.org/latest/game/assets/characters/tft18_yorick/tft18_yorick_square.png',
+  '芸阿娜':'https://raw.communitydragon.org/latest/game/assets/characters/tft18_yunara/tft18_yunara_square.png',
+  '瑟提':'https://raw.communitydragon.org/latest/game/assets/characters/tft18_sett/tft18_sett_square.png',
+  '阿狸':'https://raw.communitydragon.org/latest/game/assets/characters/tft18_ahri/tft18_ahri_square.png',
+  '艾希':'https://raw.communitydragon.org/latest/game/assets/characters/tft18_ashe/tft18_ashe_square.png',
+  '伊莉丝':'https://raw.communitydragon.org/latest/game/assets/characters/tft18_elise/tft18_elise_square.png',
+  '凯特琳':'https://raw.communitydragon.org/latest/game/assets/characters/tft18_caitlyn/tft18_caitlyn_square.png',
+  '卡西奥佩娅':'https://raw.communitydragon.org/latest/game/assets/characters/tft18_cassiopeia/tft18_cassiopeia_square.png',
+  '莫甘娜':'https://raw.communitydragon.org/latest/game/assets/characters/tft18_morgana/tft18_morgana_square.png',
+  '洛':'https://raw.communitydragon.org/latest/game/assets/characters/tft18_rakan/tft18_rakan_square.png',
+  '莉莉娅':'https://raw.communitydragon.org/latest/game/assets/characters/tft18_lillia/tft18_lillia_square.png',
+  '可酷伯':'https://raw.communitydragon.org/latest/game/assets/characters/tft18_kobuko/tft18_kobuko_square.png',
+  '提莫':'https://raw.communitydragon.org/latest/game/assets/characters/tft18_teemo/tft18_teemo_square.png',
+  '拉莫斯':'https://raw.communitydragon.org/latest/game/assets/characters/tft18_rammus/tft18_rammus_square.png',
+  '纳尔':'https://raw.communitydragon.org/latest/game/assets/characters/tft18_gnar/tft18_gnar_square.png',
+  '崔丝塔娜':'https://raw.communitydragon.org/latest/game/assets/characters/tft18_tristana/tft18_tristana_square.png',
+  '希维尔':'https://raw.communitydragon.org/latest/game/assets/characters/tft18_sivir/tft18_sivir_square.png',
+  '蔚':'https://raw.communitydragon.org/latest/game/assets/characters/tft18_vi/tft18_vi_square.png',
+  '阿卡丽':'https://raw.communitydragon.org/latest/game/assets/characters/tft18_akali/tft18_akali_square.png',
+  '韦鲁斯':'https://raw.communitydragon.org/latest/game/assets/characters/tft18_varus/tft18_varus_square.png',
+  '阿木木':'https://raw.communitydragon.org/latest/game/assets/characters/tft18_amumu/tft18_amumu_square.png',
+  '凯南':'https://raw.communitydragon.org/latest/game/assets/characters/tft18_kennen/tft18_kennen_square.png',
+  '厄斐琉斯':'https://raw.communitydragon.org/latest/game/assets/characters/tft18_aphelios/tft18_aphelios_square.png',
+  '黛安娜':'https://raw.communitydragon.org/latest/game/assets/characters/tft18_diana/tft18_diana_square.png',
+  '拉露恩':'https://raw.communitydragon.org/latest/game/assets/characters/tft18_alune/hud/tft18_alune_square.png',
+  '蕾欧娜':'https://raw.communitydragon.org/latest/game/assets/characters/tft18_leona/tft18_leona_square.png',
+  '凯尔':'https://raw.communitydragon.org/latest/game/assets/characters/tft18_kayle/tft18_kayle_square.png',
+  '瑟庄妮':'https://raw.communitydragon.org/latest/game/assets/characters/tft18_sejuani/tft18_sejuani_square.png',
+  '卡兹克':'https://raw.communitydragon.org/latest/game/assets/characters/tft18_khazix/tft18_khazix_square.png',
+  '雷恩加尔':'https://raw.communitydragon.org/latest/game/assets/characters/tft18_rengar/tft18_rengar_square.png',
+  '克格莫':'https://raw.communitydragon.org/latest/game/assets/characters/tft18_kogmaw/tft18_kogmaw_square.png',
+  '婕拉':'https://raw.communitydragon.org/latest/game/assets/characters/tft18_zyra/tft18_zyra_square.png',
+  '费德提克':'https://raw.communitydragon.org/latest/game/assets/characters/tft18_fiddlesticks/tft18_fiddlesticks_square.png',
+  '索拉卡':'https://raw.communitydragon.org/latest/game/assets/characters/tft18_soraka/tft18_soraka_square.png',
+  '塔里克':'https://raw.communitydragon.org/latest/game/assets/characters/tft18_taric/tft18_taric_square.png',
+  '艾翁':'https://raw.communitydragon.org/latest/game/assets/characters/tft18_ivern/hud/tft18_ivern_square.png',
+  '拉克丝':'https://raw.communitydragon.org/latest/game/assets/characters/tft18_lux/tft18_lux_square.png',
+  '阿利斯塔':'https://raw.communitydragon.org/latest/game/assets/characters/tft18_alistar/tft18_alistar_square.png',
+  '德莱文':'https://raw.communitydragon.org/latest/game/assets/characters/tft18_draven/tft18_draven_square.png',
+  '远古巨龙':'https://raw.communitydragon.org/latest/game/assets/characters/tft18_elderdragon/hud/tft18_elderdragon_square.png',
+  '卡尔玛':'https://raw.communitydragon.org/latest/game/assets/characters/tft18_karma/tft18_karma_square.png',
+  '乐芙兰':'https://raw.communitydragon.org/latest/game/assets/characters/tft18_leblanc/tft18_leblanc_square.png',
+  '易':'https://raw.communitydragon.org/latest/game/assets/characters/tft18_masteryi/tft18_masteryi_square.png',
+  '慎':'https://raw.communitydragon.org/latest/game/assets/characters/tft18_shen/tft18_shen_square.png',
+  '沃里克':'https://raw.communitydragon.org/latest/game/assets/characters/tft18_warwick/tft18_warwick_square.png',
+  '卡蜜尔':'https://raw.communitydragon.org/latest/game/assets/characters/tft18_camille/tft18_camille_square.png',
+  '拉克丝 (黑荆棘)':'https://raw.communitydragon.org/latest/game/assets/characters/tft18_lux/tft18_lux_blackthorn_square.png',
+  '拉克丝 (灵魂莲华)':'https://raw.communitydragon.org/latest/game/assets/characters/tft18_lux/tft18_lux_blossom_square.png',
+  '拉克丝 (魔女)':'https://raw.communitydragon.org/latest/game/assets/characters/tft18_lux/tft18_lux_coven_square.png',
+  '拉克丝 (永恒之森)':'https://raw.communitydragon.org/latest/game/assets/characters/tft18_lux/tft18_lux_elderwood_square.png',
+  '拉克丝 (花仙子)':'https://raw.communitydragon.org/latest/game/assets/characters/tft18_lux/tft18_lux_fae_square.png',
+  '拉克丝 (地狱火)':'https://raw.communitydragon.org/latest/game/assets/characters/tft18_lux/tft18_lux_inferno_square.png',
+  '拉克丝 (月蚀骑士)':'https://raw.communitydragon.org/latest/game/assets/characters/tft18_lux/tft18_lux_moonbeam_square.png',
+  '拉克丝 (野兽之灵)':'https://raw.communitydragon.org/latest/game/assets/characters/tft18_lux/tft18_lux_primal_square.png',
+  '拉克丝 (日蚀骑士)':'https://raw.communitydragon.org/latest/game/assets/characters/tft18_lux/tft18_lux_sunbeam_square.png',
+  '深红锋喙鸟':'https://raw.communitydragon.org/latest/game/assets/characters/tft18_raptor/tft18_crimsonraptor_teamplanner_splash.png'
+};
+
+/* 图标：优先用官方 TFT 棋子头像（线上加载，含野怪），加载失败降级成字牌 */
+function imgHTML(u, cls){
+  const icon = TFT_ICON[u.n];
+  const ph = `<div class="ph" style="border-color:${COST_COLOR[u.c]}${icon?'':';display:flex'}">${u.n[0]}</div>`;
+  if(!icon) return ph;
+  return `<img src="${icon}" alt="${u.n}" class="${cls||''}" loading="lazy" decoding="async"
+    onerror="this.style.display='none';var p=this.nextElementSibling;if(p)p.style.display='flex';"><div class="ph" style="border-color:${COST_COLOR[u.c]};display:none">${u.n[0]}</div>`;
+}
+const keyOf = u => u.n;
+
+/* ============================================================
+   英雄池（S18 全量官方单位，标注收录进哪些阵容）
+   ============================================================ */
+const POOL = [];
+const poolMap = new Map();
+ALL18.forEach(u=>{
+  if(poolMap.has(u.n)) return;
+  const p = {key:u.n, n:u.n, id:u.id, c:u.c, traits:new Set(u.t), in:[]};
+  poolMap.set(u.n, p); POOL.push(p);
+});
+COMPS.forEach(c=>{
+  c.units.forEach(u=>{
+    if(u.syn) return;
+    const p = poolMap.get(u.n);
+    if(p && !p.in.includes(c.id)) p.in.push(c.id);
+  });
+});
+POOL.sort((a,b)=> a.c - b.c || a.n.localeCompare(b.n,'zh'));
+
+/* ============================================================
+   开局引导
+   ============================================================ */
+const hand = new Set();
+
+function scoreComp(c, h){
+  const real = c.units.filter(u=>!u.syn);
+  const hits = real.filter(u=> h.has(keyOf(u)));
+  if(!hits.length) return null;
+
+  let raw = 0;
+  hits.forEach(u=> raw += (WEIGHT[u.c] || 10));
+
+  const carry = c.units.find(u=>u.carry);
+  const carryHit = !!(carry && h.has(keyOf(carry)));
+  if(carryHit) raw += 42;
+
+  const traitHits = [];
+  c.traits.forEach(([name, need])=>{
+    const n = hits.filter(u=> u.t.includes(name)).length;
+    if(n >= 2){
+      traitHits.push([name, n, need]);
+      if(n >= need - 1) raw += 8 + n * 2;
+    }
+  });
+
+  const cov = hits.length / Math.max(1, real.length);
+  raw += cov * 48;
+  raw -= (real.length - hits.length) * 1.5;
+
+  return {c, hits, carryHit, cov, traitHits, raw};
+}
+
+function verdictOf(s){
+  if(s.carryHit && s.cov >= 0.5) return {k:'hi', t:'强推'};
+  if(s.carryHit || s.cov >= 0.42) return {k:'mid', t:'可走'};
+  if(s.cov >= 0.25) return {k:'low', t:'备选'};
+  return {k:'low', t:'勉强'};
+}
+function pctOf(s){
+  const real = s.c.units.filter(u=>!u.syn);
+  const full = real.reduce((a,u)=> a + (WEIGHT[u.c]||10), 0) + 42 + 48 + 40;
+  return Math.max(6, Math.min(99, Math.round(s.raw / full * 100)));
+}
+function flowBrief(c){
+  const t = c.flow.replace(/<[^>]+>/g,'');
+  const i = t.indexOf('。');
+  return i > 0 ? t.slice(0, i+1) : t.slice(0, 46) + '…';
+}
+
+function renderHand(){
+  const box = $('handBox');
+  if(!hand.size){
+    box.innerHTML = `<div class="empty">还没选牌。从下面点几个你手上真有的英雄 —— 三个就够我判断方向了。</div>`;
+    return;
+  }
+  box.innerHTML = [...hand].map(k=>{
+    const p = poolMap.get(k);
+    if(!p) return '';
+    return `<div class="hchip" data-k="${k}" title="点一下移除 ${p.n}">
+      ${imgHTML({n:p.n, id:p.id, c:p.c})}
+      <div class="hn">${p.n}</div><span class="x">×</span>
+    </div>`;
+  }).join('');
+  box.querySelectorAll('.hchip').forEach(el=>{
+    el.addEventListener('click', ()=>{ hand.delete(el.dataset.k); renderHand(); renderPool(); renderAdvice(); });
+  });
+}
+
+function renderPool(){
+  const groups = [1,2,3,4,5].map(c=>({c, items:POOL.filter(p=>p.c===c)})).filter(g=>g.items.length);
+  $('poolBox').innerHTML = groups.map(g=>`
+    <div class="poolgroup">
+      <div class="gl"><i style="background:${COST_COLOR[g.c]}"></i>${COST_NAME[g.c]} · ${g.items.length} 个</div>
+      <div class="poolgrid">${g.items.map(p=>`
+        <div class="pchip ${hand.has(p.key)?'picked':''} ${p.in.length?'':'nowork'}" data-k="${p.key}" title="${p.n}｜${COST_NAME[p.c]}｜${[...p.traits].join('·')}${p.in.length?'':(p.n.indexOf('拉克丝')===0?'｜自然之力形态：开局/强化符文点哪个羁绊就变成哪个形态，不固定进某套阵容':'｜暂无成型阵容，作打工牌')}">
+          ${imgHTML({n:p.n, id:p.id, c:p.c})}
+          <div class="pn">${p.n}</div>
+        </div>`).join('')}
+      </div>
+    </div>`).join('');
+  $('poolBox').querySelectorAll('.pchip').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      const k = el.dataset.k;
+      hand.has(k) ? hand.delete(k) : hand.add(k);
+      renderHand(); renderPool(); renderAdvice();
+    });
+  });
+}
+
+function renderAdvice(){
+  const list = COMPS.map(c=> scoreComp(c, hand)).filter(Boolean).sort((a,b)=> b.raw - a.raw);
+  const box = $('advList');
+
+  if(!hand.size){
+    box.innerHTML = `<div class="alert warn"><span>👋</span><div>
+      <b>先告诉我你手上有什么</b>
+      <div class="txt">点左边英雄池里的英雄，加进「我的手牌」。选 1 个我只能猜，选 3 个以上基本就能定方向了。</div>
+      </div></div>`;
+    $('advCount').textContent = '';
+    $('advHint').innerHTML = '这个模式不猜阵容，只看你实际拿到的牌。<b style="color:var(--dim)">我按「主 C 是否在手 → 羁绊骨架是否成形 → 还差几个人」三步打分</b>，不是随便推一套热度高的给你。';
+    return;
+  }
+
+  if(!list.length){
+    const works = [...hand].filter(k=> poolMap.get(k)?.in.length);
+    box.innerHTML = `<div class="alert ${works.length?'warn':'bad'}"><span>🤔</span><div>
+      <b>${works.length?'手牌里还没有成型阵容的核心牌':'这几个牌凑不出成型阵容'}</b>
+      <div class="txt">${works.length?'你选的牌在当前 11 套里都挂不上。先用它们打工过渡，等 3-2 之后牌面清晰了再来选一次。':'这不代表打不了——先用它们打工过渡，等 3-2 之后牌面清晰了再来选一次。'}</div>
+      </div></div>`;
+    $('advCount').textContent = '0 条匹配';
+    $('advHint').innerHTML = '提示：优先选<b style="color:var(--dim)">费用高的、或者成对出现的同羁绊牌</b>，那才代表方向。';
+    return;
+  }
+
+  const top = list.slice(0, 3);
+  $('advCount').textContent = `${list.length} 套对得上`;
+  let hintHtml = `打分口径：<b style="color:var(--dim)">主 C 命中（+42）→ 命中牌费用（+10~19/张）→ 同羁绊两人以上（+8~18/条）→ 覆盖率（+48 封顶）→ 缺口扣分</b>。选中的这套点下面的按钮，可以直接把缺的位置一次性标出来。`;
+  const nowork = [...hand].filter(k=> !(poolMap.get(k)?.in.length)).length;
+  if(nowork) hintHtml += `<br><b style="color:var(--gold)">有 ${nowork} 张是打工牌</b>（不属于任何成型阵容），不计入匹配。真正定方向的是其余几张。`;
+  $('advHint').innerHTML = hintHtml;
+
+  box.innerHTML = top.map((s, i)=>{
+    const c = s.c, v = verdictOf(s), pct = pctOf(s);
+    const real = c.units.filter(u=>!u.syn);
+    const missing = real.filter(u=> !hand.has(keyOf(u)));
+    const carry = c.units.find(u=>u.carry);
+
+    let why = '';
+    if(s.carryHit) why += `主 C <b>${carry.n}</b> 已经在手，整套的输出核心就位。`;
+    else why += `主 C <b>${carry.n}</b> 还没拿到，这是这套最大的缺口。`;
+    if(s.traitHits.length){
+      why += `<span class="line"><span class="lbl">羁绊</span>手上的牌已经点了 ${s.traitHits.map(([n,h,nd])=>`<b>${n} ${h}/${nd}</b>`).join('、')}，骨架对得上。</span>`;
+    }
+    why += `<span class="line miss"><span class="lbl">还差</span>${missing.length} 个：${missing.slice(0,4).map(u=>`${u.n}<span style="color:var(--faint)">(${u.c})</span>`).join('、')}${missing.length>4?` 等 ${missing.length} 张`:''}</span>`;
+    why += `<span class="line"><span class="lbl">下一步</span>${flowBrief(c)}</span>`;
+
+    return `<div class="adv ${i===0?'top':''}">
+      <div class="rank">${i===0?'最推荐':'备选 '+(i+1)}</div>
+      <div class="advhead">
+        ${imgHTML(real.find(u=>u.carry) || real[0])}
+        <div class="t">
+          <b>${c.name}</b>
+          <span>${c.style} · ${real.length} 人口${c.avg?' · 平均 '+c.avg.toFixed(2)+' 名':''}</span>
+        </div>
+        <span class="verdict ${v.k}">${v.t}</span>
+      </div>
+      <div class="meter"><i style="width:${pct}%"></i></div>
+      <div class="advwhy">${why}</div>
+      <button class="advbtn" data-comp="${c.id}">就走这套 → 载入棋盘（自动标出还缺谁）</button>
+    </div>`;
+  }).join('');
+
+  box.querySelectorAll('.advbtn').forEach(el=>{
+    el.addEventListener('click', ()=> loadComp(el.dataset.comp));
+  });
+}
+
+/* 从引导页载入某套阵容，并把不在手牌里的棋子全部标成缺失 */
+function loadComp(id){
+  const idx = COMPS.findIndex(c=>c.id===id);
+  if(idx < 0) return;
+  cur = idx;
+  const c = COMPS[cur];
+  const set = new Set();
+  if(hand.size){
+    c.units.forEach((u,i)=>{ if(!hand.has(keyOf(u))) set.add(i); });
+  }
+  missed[c.id] = set;
+  segTab('lib');
+  renderSelector(); renderAll();
+  lastAction = { compId:c.id, auto:true, count:set.size };
+  renderSay();
+  toast(`已载入「${c.name}」`, set.size ? `把不在你手上的 ${set.size} 个位置标成缺了` : '');
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+/* ============================================================
+   阵容库
+   ============================================================ */
+let cur = 0;
+let missed = {};
+let stars = {};            /* stars[compId][unitIdx] = 0~3，未设置按目标星级算 */
+let lastAction = null;
+COMPS.forEach(c=> missed[c.id] = new Set());
+
+/* ===== 星级 ===== */
+/* 一张 1 星=1 张、2 星=3 张、3 星=9 张 */
+const CARD_COUNT = {0:0, 1:1, 2:3, 3:9};
+/* 目标星级：4/5 费只到 2 星；主 C 追 3 星；1-2 费追 3 星；其余 2 星 */
+function targetStar(u){
+  if(u.c >= 4) return 2;
+  if(u.carry) return 3;
+  return u.c <= 2 ? 3 : 2;
+}
+function starOf(c, i){
+  const m = stars[c.id];
+  if(m && typeof m[i] === 'number') return m[i];
+  return 0;                     /* 默认 0 颗：我们不知道你手上实际有几张，一颗一颗点上去 */
+}
+function setStar(c, i, n){
+  if(!stars[c.id]) stars[c.id] = {};
+  stars[c.id][i] = n;
+  if(!missed[c.id]) missed[c.id] = new Set();
+  if(n === 0) missed[c.id].add(i); else missed[c.id].delete(i);
+}
+/* 整套阵容的成型情况：只统计你已经点过星的位置 */
+function compProgress(c){
+  let done = 0, total = 0, marked = 0, cards = 0;
+  c.units.forEach((u,i)=>{
+    if(u.syn) return;              /* 羁绊假人不算 */
+    total++;
+    const t = targetStar(u), s = starOf(c, i);
+    if(s > 0) marked++;
+    if(s >= t) done++;
+    if(s > 0 && s < t) cards += CARD_COUNT[t] - CARD_COUNT[s];
+  });
+  return { done, total, marked, cards };
+}
+
+/* ===== 阵容强度榜 ===== */
+function renderStatTable(){
+  const order = COMPS.map((c,i)=>({c,i}))
+    .sort((a,b)=>(a.c.avg||99)-(b.c.avg||99));
+  $('statBody').innerHTML = order.map(({c,i},r)=>`
+    <tr data-i="${i}">
+      <td><span class="rk">${r+1}</span> ${c.name}</td>
+      <td><span class="tierchip ${c.tier}">${c.tier}</span></td>
+      <td class="${c.avg?'':'dash'}">${c.avg?c.avg.toFixed(2):'—'}</td>
+      <td class="${c.top4?'':'dash'}">${c.top4?c.top4.toFixed(1)+'%':'—'}</td>
+      <td class="${c.win?'':'dash'}">${c.win?c.win.toFixed(1)+'%':'—'}</td>
+      <td class="col-games ${c.games?'':'dash'}">${c.games?c.games.toLocaleString():'—'}</td>
+    </tr>`).join('');
+}
+$('statBody').addEventListener('click', e=>{
+  const tr = e.target.closest('tr[data-i]');
+  if(!tr) return;
+  cur = +tr.dataset.i;
+  if(!missed[COMPS[cur].id]) missed[COMPS[cur].id] = new Set();
+  lastAction = null;
+  renderSelector(); renderAll();
+  document.getElementById('boardTitle').scrollIntoView({behavior:'smooth', block:'start'});
+});
+renderStatTable();
+
+function renderSelector(){
+  $('selector').innerHTML = COMPS.map((c,i)=>{    const main = c.units.find(u=>u.carry) || c.units[0];
+    return `<div class="selcard ${i===cur?'on':''}" data-i="${i}">
+      <span class="bd ${c.tier}">${c.tier}</span>
+      ${imgHTML(main,'av')}
+      <div class="nm">${c.name}</div>
+      <div class="mt">${c.avg ? c.avg.toFixed(2)+' 名' : c.style}</div>
+    </div>`;
+  }).join('');
+  $('selector').querySelectorAll('.selcard').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      cur = +el.dataset.i;
+      if(!missed[COMPS[cur].id]) missed[COMPS[cur].id] = new Set();
+      lastAction = null;
+      renderSelector(); renderAll();
+    });
+  });
+}
+
+function renderBoard(){
+  const c = COMPS[cur];
+  const ms = missed[c.id] || new Set();
+  const idx = c.units.map((u,i)=>({u,i}));
+  const front = idx.filter(x=>x.u.row===0);
+  const back  = idx.filter(x=>x.u.row===1);
+
+  const slot = ({u,i}) => {
+    const isMiss = ms.has(i);
+    const tgt = targetStar(u);
+    const now = starOf(c, i);
+    const items = u.it.map(it=>{
+      return `<span class="it ${it.k}" data-item="${it.n}" title="${it.n}｜点开看合成路径">${itImgHTML(it.n)}</span>`;
+    }).join('');
+    const starHTML = [1,2,3].map(k=>{
+      const cls = k <= now ? 'on' : (k <= tgt ? 'tgt' : '');
+      return `<i data-s="${k}" class="${cls}">★</i>`;
+    }).join('');
+    const need = CARD_COUNT[tgt] - CARD_COUNT[now];
+    const needHTML = (now > 0 && need > 0) ? `<div class="needtag">还差 ${need} 张</div>` : '';
+    const tip = `${u.n} · ${u.r}｜点棋子标记缺牌，点星星标星级（目标 ${'★'.repeat(tgt)}）`;
+    return `<div class="slot ${u.carry?'carry':''} ${isMiss?'missed':''} ${now>=3?'ok3':''}" data-i="${i}" data-cost="${u.c}" title="${tip}">
+      <div class="avwrap">
+        ${u.carry?'<span class="crown">👑</span>':''}
+        ${imgHTML(u)}
+        <span class="costtag">${u.c}</span>
+      </div>
+      <div class="stars" data-i="${i}">${starHTML}</div>
+      <div class="uname" data-hero="${u.n}" style="cursor:pointer" title="${u.n}｜点开看羁绊和装备">${u.n}</div>
+      <div class="items">${items}</div>
+      ${needHTML}
+    </div>`;
+  };
+
+  const pg = compProgress(c);
+  const sumHTML = `<div class="boardsum">
+      <span>已标 <b class="${pg.marked>=pg.total?'ok':''}">${pg.marked}/${pg.total}</b> 位</span>
+      <span class="dot">·</span>
+      <span>${pg.marked === 0
+        ? '<span class="hint">点棋子下的 ★ 一颗一颗往上点，标你实际拿到的星级</span>'
+        : (pg.cards > 0 ? `还差 <b class="warn">${pg.cards}</b> 张牌` : '已标位置星级达标')}</span>
+    </div>`;
+
+  $('board').innerHTML = sumHTML + `
+    <div class="zone front"><span class="zlabel">前排</span>${front.map(slot).join('')}</div>
+    <div class="zone back"><span class="zlabel">后排</span>${back.map(slot).join('')}</div>`;
+
+  $('board').querySelectorAll('.slot').forEach(el=>{
+    el.addEventListener('click', ()=> toggleMiss(+el.dataset.i, el));
+  });
+  /* 点星星：一颗一颗往上加（0→1→2→3→回到 0），别冒泡触发「标记缺牌」 */
+  $('board').querySelectorAll('.stars').forEach(box=>{
+    box.addEventListener('click', (ev)=>{
+      ev.stopPropagation();
+      const i = +box.dataset.i;
+      const u = c.units[i];
+      const nowS = starOf(c, i);
+      const next = nowS >= 3 ? 0 : nowS + 1;
+      setStar(c, i, next);
+      lastAction = { compId:c.id, unitIdx:i, removed:next > 0, diff:[], star:next };
+      renderAll();
+      const tgt = targetStar(u);
+      if(next === 0){
+        toast(`「${u.n}」清零`, `这颗的目标是 ${'★'.repeat(tgt)}，重新往上点就行`);
+      } else if(next >= tgt){
+        toast(`「${u.n}」${'★'.repeat(next)} 已达标`, tgt < next ? '超出目标，不用再追了' : '这个位置可以不用再找了');
+      } else {
+        toast(`「${u.n}」标成 ${'★'.repeat(next)}`, `还差 ${CARD_COUNT[tgt] - CARD_COUNT[next]} 张升到 ${'★'.repeat(tgt)}`);
+      }
+    });
+  });
+}
+
+/* 计算点掉某个棋子前后的羁绊差 */
+function traitDiff(c, ms, idx){
+  const count = (set)=>{
+    const m = {};
+    c.units.forEach((u,i)=>{ if(!set.has(i)) u.t.forEach(t=> m[t]=(m[t]||0)+1); });
+    return m;
+  };
+  const after = new Set(ms);
+  if(ms.has(idx)) after.delete(idx); else after.add(idx);
+  const a = count(ms), b = count(after);
+  const diff = [];
+  c.traits.forEach(([name, need])=>{
+    const before = a[name]||0, now = b[name]||0;
+    if(before !== now) diff.push([name, before, now, need]);
+  });
+  return diff;
+}
+
+function toggleMiss(i, el){
+  const c = COMPS[cur];
+  if(!missed[c.id]) missed[c.id] = new Set();
+  const wasMissing = missed[c.id].has(i);
+  const diff = traitDiff(c, missed[c.id], i);
+  wasMissing ? missed[c.id].delete(i) : missed[c.id].add(i);
+  /* 星级联动：恢复时清掉手动星级（回到目标星级）；标缺时星级直接归 0 */
+  if(wasMissing){
+    if(stars[c.id]) delete stars[c.id][i];
+  } else {
+    if(!stars[c.id]) stars[c.id] = {};
+    stars[c.id][i] = 0;
+  }
+  lastAction = { compId:c.id, unitIdx:i, removed:wasMissing, diff };
+  renderAll();
+  const slot = document.querySelector(`.slot[data-i="${i}"]`);
+  if(slot){ slot.classList.add('flash'); setTimeout(()=>slot.classList.remove('flash'), 560); }
+  const u = c.units[i];
+  toast(wasMissing ? `已恢复「${u.n}」` : `标记缺牌：${u.n}`,
+        wasMissing ? '羁绊计数已加回来' : (diff.length ? `${diff[0][0]} ${diff[0][1]}→${diff[0][2]}` : '羁绊数量不受影响'));
+}
+
+/* ===== 作战助手：对话式反馈 ===== */
+function renderSay(){
+  const block = $('sayBlock'), box = $('sayBox');
+  const c = COMPS[cur];
+
+  if(!lastAction || lastAction.compId !== c.id || lastAction.star !== undefined){
+    block.style.display = 'none';
+    return;
+  }
+  block.style.display = 'block';
+
+  /* 从引导页载入：整体体检 */
+  if(lastAction.auto){
+    const ms = missed[c.id] || new Set();
+    const real = c.units.map((u,i)=>({u,i})).filter(x=>!x.u.syn);
+    const gone = real.filter(x=> ms.has(x.i));
+    const carryGone = gone.some(x=> x.u.carry);
+    if(!gone.length){
+      box.innerHTML = wrapSay(`<p class="who">作战助手</p>
+        <p>你手上的牌正好凑齐了 <span class="hl">${c.name}</span>。直接照左边的棋盘摆，按下面的运营节奏走。</p>`);
+      return;
+    }
+    const head = carryGone
+      ? `<p>你手上缺了主 C <span class="bad">${c.units.find(u=>u.carry).n}</span>，这套的火力线是断的。硬打大概率第五第六，不如现在就想好退路。</p>`
+      : `<p>你手上有 ${real.length - gone.length} 个，还差 <span class="bad">${gone.length}</span> 个位置。下面按重要程度排了替代方案。</p>`;
+    const rank = gone.filter(x=>x.u.carry).concat(gone.filter(x=>!x.u.carry));
+    box.innerHTML = wrapSay(`<p class="who">作战助手 · 已按你的手牌体检</p>${head}
+      <div class="altlist" style="margin-top:8px">${rank.slice(0,4).map(x=>`
+        <div class="alt"><b>缺 ${x.u.n}</b><span>${x.u.alt[0][0]} —— ${x.u.alt[0][1]}</span></div>`).join('')}</div>
+      ${carryGone && c.pivot ? `<div class="act">${c.pivot.map(([to,why])=>
+        `<button class="pri" data-pivot="${to}">转 ${compName(to)}</button>`).join('')}</div>` : ''}`);
+    bindSayActs();
+    return;
+  }
+
+  /* 手动点掉某个棋子 */
+  const i = lastAction.unitIdx;
+  const u = c.units[i];
+  if(lastAction.removed){
+    box.innerHTML = wrapSay(`<p class="who">作战助手</p>
+      <p>已把 <span class="hl">${u.n}</span> 加回来，${u.t.length?`${u.t.join('、')} 的计数同步加回去了`:'羁绊不受影响'}。</p>`);
+    return;
+  }
+
+  const brokenNow = lastAction.diff.filter(d=> d[2] < d[3]);
+  const ms = missed[c.id] || new Set();
+  const carryGone = u.carry;
+  const altRows = u.alt.map(([nm,note])=>
+    `<div class="alt"><b>${nm}</b>${note?`<span>${note}</span>`:''}</div>`).join('');
+
+  let impact;
+  if(brokenNow.length){
+    impact = `影响：${brokenNow.map(d=>`<span class="bad">${d[0]} ${d[1]}→${d[2]}/${d[3]}（掉档）</span>`).join('、')}。`;
+  } else if(lastAction.diff.length){
+    impact = `影响：${lastAction.diff.map(d=>`${d[0]} ${d[1]}→${d[2]}/${d[3]}`).join('、')}，<span class="ok">还没跌破成型线</span>。`;
+  } else {
+    impact = `影响：<span class="ok">羁绊数量不变</span>，这个位置是功能位，少了他不塌。`;
+  }
+  if(carryGone){
+    impact += ` <span class="bad">而且这是主 C</span>——整套的输出来源，不是换个前排就能补的。`;
+  }
+
+  box.innerHTML = wrapSay(`<p class="who">作战助手 · 你标了「没拿到 ${u.n}」</p>
+    <p>${impact}</p>
+    <p style="margin-top:6px">替代方案：</p>
+    <div class="altlist">${altRows}</div>
+    ${carryGone && c.pivot ? `<div class="act">
+      ${c.pivot.map(([to,why])=>`<button class="pri" data-pivot="${to}">转 ${compName(to)}</button>`).join('')}
+    </div>` : `<div class="act"><button data-undo="${i}">点错了，撤销</button></div>`}`);
+  bindSayActs();
+}
+function wrapSay(inner){
+  return `<div class="say"><div class="av">🧭</div><div class="body">${inner}</div></div>`;
+}
+function compName(id){ const c = COMPS.find(x=>x.id===id); return c ? c.name : id; }
+function bindSayActs(){
+  $('sayBox').querySelectorAll('[data-pivot]').forEach(el=>{
+    el.addEventListener('click', ()=> loadComp(el.dataset.pivot));
+  });
+  $('sayBox').querySelectorAll('[data-undo]').forEach(el=>{
+    el.addEventListener('click', ()=> toggleMiss(+el.dataset.undo));
+  });
+}
+
+/* ===== 羁绊 ===== */
+function renderTraits(){
+  const c = COMPS[cur];
+  const ms = missed[c.id] || new Set();
+  const count = {};
+  c.units.forEach((u,i)=>{ if(!ms.has(i)) u.t.forEach(t=> count[t] = (count[t]||0)+1); });
+
+  const rows = c.traits.map(([name, need])=>{
+    const have = count[name] || 0;
+    const ok = have >= need;
+    const pct = Math.min(100, Math.round(have/need*100));
+    return `<div class="traitrow ${ok?'ok':'broken'}">
+      <span class="tn">${name}</span>
+      <span class="bar"><i style="width:${pct}%"></i></span>
+      <span class="cnt">${have}/${need}</span>
+    </div>`;
+  }).join('');
+
+  const broken = c.traits.filter(([n,need]) => (count[n]||0) < need);
+  $('traitList').innerHTML = rows + (broken.length
+    ? `<div class="alert bad" style="margin-top:10px"><span>⚠️</span><div>
+        <b>${broken.map(b=>b[0]).join('、')} 掉档了</b>
+        <div class="txt">这几条已经跌破成型所需的数量。补人或者接受降级——降档以后如果还打不过，就该考虑转线了。</div></div></div>`
+    : `<div class="alert good" style="margin-top:10px"><span>✓</span><div>
+        <b>羁绊齐全</b><div class="txt">所有羁绊都达到成型数量，照这个阵容打。</div></div></div>`);
+}
+
+/* ===== 还差什么 ===== */
+function renderMiss(){
+  const c = COMPS[cur];
+  const ms = missed[c.id] || new Set();
+  const block = $('missBlock');
+  if(ms.size === 0){ block.style.display = 'none'; return; }
+  block.style.display = 'block';
+
+  const rows = [...ms].sort((a,b)=>{
+    const ca = c.units[a].carry ? -1 : 0, cb = c.units[b].carry ? -1 : 0;
+    return ca - cb;
+  }).map(i=>{
+    const u = c.units[i];
+    const alts = u.alt.slice(0,2).map(([nm,note])=>
+      `<div class="alt"><b>${nm}</b>${note?`<span>${note}</span>`:''}</div>`).join('');
+    return `<div style="margin-bottom:11px">
+      <div style="font-size:12.5px; margin-bottom:4px">
+        ${u.carry?'👑 ':''}<b style="color:${u.carry?'var(--gold)':'var(--txt)'}">缺 ${u.n}</b>
+        <span style="color:var(--faint);font-size:11.5px">（${u.c} 费 · ${u.r}）</span>
+      </div>
+      <div class="altlist">${alts}</div>
+    </div>`;
+  }).join('');
+
+  const carryIdx = c.units.findIndex(u=>u.carry);
+  const carryGone = carryIdx >= 0 && ms.has(carryIdx);
+  const head = carryGone
+    ? `<div class="alert bad"><span>⛔</span><div><b>主 C 没了，骨架就散了</b>
+        <div class="txt">别硬留，按下面的方案转线。硬撑通常是第五第六，不如早转保住前四。</div></div></div>`
+    : `<div class="alert warn"><span>ℹ️</span><div><b>缺 ${ms.size} 个位置</b>
+        <div class="txt">按下面的替代填坑，注意羁绊数量会跟着变。</div></div></div>`;
+  $('missPanel').innerHTML = head + rows;
+}
+
+/* ===== 主 C / 文本 / 阵容码 ===== */
+function renderCarry(){
+  const c = COMPS[cur];
+  const u = c.units.find(x=>x.carry);
+  if(!u){ $('carryBox').innerHTML = '<span style="color:var(--faint);font-size:12px">这套没有单点主 C</span>'; return; }
+  const ms = missed[c.id] || new Set();
+  const idx = c.units.indexOf(u);
+  const gone = ms.has(idx);
+  const items = u.it.map(i=>`<span class="it ${i.k}" data-item="${i.n}" title="${i.n}｜点开看合成路径" style="width:18px;height:18px">${itImgHTML(i.n)}</span>`).join('');
+  $('carryBox').innerHTML = `
+    <div style="${gone?'filter:grayscale(1) brightness(.6)':''}">${imgHTML(u)}</div>
+    <div class="info">
+      <b style="${gone?'color:var(--red);text-decoration:line-through':''}">${u.n}${gone?' · 缺':''}</b>
+      <span>${u.c} 费 · ${u.r}</span>
+      <div style="display:flex;gap:3px;margin-top:4px">${items}</div>
+    </div>`;
+}
+
+/* ===== 阶段经济 / 装备节奏：按运营风格归档 ===== */
+const ECON = {
+  reroll1: {
+    early:{pop:'4 → 5 人口，不点升级', spend:false, gold:'留 40～50 金吃满利息，血可以掉，经济不能断', act:'只抓体系一费，见到就买；不为打工牌 D 一次牌'},
+    mid:{pop:'5 人口原地停，一级都不升', spend:true, gold:'3-1 一把 D 到 0，出三星立刻停手', act:'一费三星就是这套的强度，早搜牌池最干净'},
+    late:{pop:'三星出来 4-1 上 6、4-5 上 7', spend:false, gold:'重新存回 50，只用利息补牌', act:'补四费前排和羁绊位，多出来的装备给副 C'}
+  },
+  reroll6: {
+    early:{pop:'2-1 升 4、2-5 升 5、3-2 前上 6', spend:false, gold:'一路存到 50 金，5 级只吃利息不 D', act:'打工牌扛住血量，体系低费见到就抓'},
+    mid:{pop:'6 人口停手，别上 7', spend:true, gold:'60 金以上开 D，D 到 40～50 就停', act:'追 2～3 个三星；血量掉到 35 以下先补质量再说人口'},
+    late:{pop:'三星齐了 4-5 上 7、5-1 上 8', spend:false, gold:'存 50 吃息，留 20～30 补强', act:'补四费核心和最后一个羁绊位'}
+  },
+  reroll7: {
+    early:{pop:'按正常节奏，3-5 前上 7', spend:false, gold:'存 50 吃满利息，一次都别 D', act:'前期只打工过渡，不为过渡牌花一块钱'},
+    mid:{pop:'7 人口停手', spend:true, gold:'50 以上开 D，D 到 30 停', act:'追三费主 C 三星；血量低于 35 先把质量补起来'},
+    late:{pop:'5 阶段拉 8 补最后一张', spend:false, gold:'存 40 再补牌', act:'阵容锁死之后只补羁绊和装备'}
+  },
+  reroll3: {
+    early:{pop:'正常升到 6', spend:false, gold:'存 50，不 D 牌', act:'打工牌顶住，三费体系牌见到就留'},
+    mid:{pop:'4-1 上 7', spend:true, gold:'7 级 D 到 30 停手', act:'追三费三星，这是这套唯一的胜负手'},
+    late:{pop:'三星后上 8', spend:false, gold:'存 40 补强', act:'补四费前排和副 C，站位移到最终位置'}
+  },
+  fast8: {
+    early:{pop:'2-1 升 4、2-5 升 5、3-2 升 6', spend:false, gold:'血量健康就存到 50 吃满 5 利息', act:'只花升级钱，绝不 D 牌'},
+    mid:{pop:'4-1 升 7；血量多就不 D', spend:false, gold:'留 40～50 过完 4 阶段', act:'用利息白嫖二星过渡，别为一张四费提前梭哈'},
+    late:{pop:'4-5 ～ 5-1 升 8', spend:true, gold:'8 级 D 到 20～30 找核心四费', act:'核心二星就停手存钱；血量掉到 30 以下提前 D'}
+  },
+  fast9: {
+    early:{pop:'2-1 升 4、2-5 升 5、3-2 升 6，血优先', spend:false, gold:'存 50 吃满利息', act:'打工牌顶血，不 D、不追牌'},
+    mid:{pop:'4-1 升 7、4-5 升 8，全程不 D', spend:false, gold:'50 金以上只用利息，别破 40', act:'稳住血量等五费池，掉点血也别慌'},
+    late:{pop:'5-2 ～ 5-5 上 9', spend:true, gold:'9 级 D 到 10～20', act:'五费到手就上，装备全堆主 C'}
+  }
+};
+function econKey(style){
+  if(/一费赌狗/.test(style)) return 'reroll1';
+  if(/七级慢/.test(style)) return 'reroll7';
+  if(/六人口|六级停手/.test(style)) return 'reroll6';
+  if(/三费赌狗/.test(style)) return 'reroll3';
+  if(/上九|九人口/.test(style)) return 'fast9';
+  return 'fast8';
+}
+
+function renderStages(){
+  const c = COMPS[cur];
+  const real = c.units.filter(u=>!u.syn);
+  const byCost = k => real.filter(u=>u.c<=k);
+  let early = byCost(2);
+  let earlyNote = '低费牌先上场打工，抢到的散件先给主 C 存着，保血量保经济';
+  if(early.length < 2){
+    early = real.slice().sort((a,b)=>a.c-b.c).slice(0,3);
+    earlyNote = '这套低费牌少，前期先拿通用前排（护卫/斗士）和体系牌打工过渡，别硬凑';
+  }
+  const mid = byCost(3);
+  const plan = ECON[econKey(c.style)] || ECON.fast8;
+  /* 装备顺序：主 C 的三件按 1→2→3 拆到三个阶段 */
+  const carry = c.units.find(u=>u.carry) || c.units.find(u=>u.r==='主 C') || c.units[0];
+  const its = ((carry && carry.it) || []).map(i=>i.n);
+  const EQNOTE = [
+    '散件不攒，先凑主 C 第一件核心；大剑/反曲弓别丢给打工牌',
+    '第二件成型，主 C 开始接管比赛',
+    '第三件看对手补：前排厚换破甲，回血多换重伤'
+  ];
+  const stages = [
+    {tag:'前期', cls:'e', when:'2-1 ～ 3-1', list:early, note:earlyNote, p:plan.early, eq:0},
+    {tag:'中期', cls:'m', when:'3-2 ～ 4-1', list:mid.length>=early.length?mid:real.slice().sort((a,b)=>a.c-b.c).slice(0,Math.max(4,early.length+2)), note:'三费核心到位，先给主 C 合两件装备，开始 D 牌抬质量', p:plan.mid, eq:1},
+    {tag:'成型', cls:'l', when:'5 阶段以后', list:real, note:'拉满人口换上最终阵容，追三星、补齐第三件装', p:plan.late, eq:2}
+  ];
+  const row = s => {
+    const avs = s.list.map(u=>`
+      <div class="savatar" data-hero="${u.n}" title="${u.n}｜${COST_NAME[u.c]}｜${u.r}">
+        ${imgHTML(u)}
+        <div class="sn">${u.n}</div>
+      </div>`).join('');
+    const eqName = its[s.eq];
+    const eqHTML = eqName
+      ? `<span>${itImgHTML(eqName)}<b>${eqName}</b> — ${EQNOTE[s.eq]}</span>`
+      : `<span>${its.length ? '主 C 第三件按对局补，先看上面「主 C」卡片' : '这套装备跟着主 C 走，见上方「主 C」卡片'}</span>`;
+    return `<div class="stagerow">
+      <div class="stagewrap"><div class="stagetag ${s.cls}">${s.tag}</div><div class="stagewhen">${s.when}</div></div>
+      <div class="stageunits" style="flex-direction:row; flex-wrap:wrap">${avs}
+        <div class="stageplan">
+          <div class="pl"><span class="k pop">人口</span><span>${s.p.pop}</span></div>
+          <div class="pl"><span class="k ${s.p.spend?'spend':'save'}">${s.p.spend?'花钱':'存钱'}</span><span>${s.p.gold}</span></div>
+          <div class="pl"><span class="k eq">装备</span>${eqHTML}</div>
+          <div class="pl"><span class="k" style="background:rgba(255,255,255,.05); color:var(--faint); border:1px solid var(--line)">打法</span><span>${s.p.act}</span></div>
+        </div>
+        <div class="stagenote">${s.note}</div>
+      </div>
+    </div>`;
+  };
+  $('stageBox').innerHTML = stages.map(row).join('');
+}
+
+function renderText(){
+  const c = COMPS[cur];
+  $('boardTitle').textContent = c.name + ' · ' + c.units.filter(u=>!u.syn).length + ' 人口 · ' + c.style;
+  $('flowTxt').innerHTML = c.flow;
+  $('detailTxt').innerHTML =
+    `<b style="color:var(--gold)">站位</b><br>${c.pos}<br><br>` +
+    `<b style="color:var(--gold)">常见错误</b><br>${c.mistakes.map(m=>'· '+m).join('<br>')}<br><br>` +
+    `<b style="color:var(--gold)">什么时候放弃</b><br>${c.giveUp}`;
+  $('codeBox').innerHTML = c.code
+    ? `<span>${c.code}</span><button onclick="copyCode('${c.code}',this)">复制</button>`
+    : `<span style="color:var(--faint);font-family:inherit">这套没有官方阵容码，按棋盘摆就行</span>`;
+}
+function copyCode(txt, btn){
+  navigator.clipboard.writeText(txt).then(()=>{
+    btn.textContent='已复制'; setTimeout(()=>btn.textContent='复制',1500);
+  }).catch(()=>{ btn.textContent='手动复制'; });
+}
+
+function renderAll(){
+  renderBoard(); renderTraits(); renderMiss(); renderCarry(); renderText(); renderStages(); renderSay();
+}
+
+/* ============================================================
+   toast / 切页
+   ============================================================ */
+let toastTimer;
+function toast(main, sub){
+  const el = $('toast');
+  $('toastTxt').innerHTML = `<b>${main}</b>${sub?`<span style="color:var(--dim);margin-left:6px">${sub}</span>`:''}`;
+  el.classList.add('on');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=> el.classList.remove('on'), 2400);
+}
+
+function segTab(name){
+  document.querySelectorAll('.tabs button').forEach(b=> b.classList.toggle('on', b.dataset.tab===name));
+  document.querySelectorAll('section.tab').forEach(s=> s.classList.toggle('on', s.id === 'tab-'+name));
+}
+document.querySelectorAll('.tabs button').forEach(b=>{
+  b.addEventListener('click', ()=> segTab(b.dataset.tab));
+});
+
+/* ============================================================
+   初始化
+   ============================================================ */
+renderHand(); renderPool(); renderAdvice();
+renderSelector(); renderAll();
+
+$('resetBtn').addEventListener('click', ()=>{
+  missed[COMPS[cur].id] = new Set();
+  stars[COMPS[cur].id] = {};
+  lastAction = { compId:COMPS[cur].id, auto:true, count:0 };
+  renderAll();
+});
+
+/* ============================================================
+   账号：登录后恢复上次进度 + 自动保存到该账号
+   ============================================================ */
+function snapState(){
+  const onBtn = document.querySelector('.tabs button.on');
+  const m = {};
+  COMPS.forEach(c=>{ if(missed[c.id] && missed[c.id].size) m[c.id] = [...missed[c.id]]; });
+  const sv = {};
+  COMPS.forEach(c=>{ if(stars[c.id] && Object.keys(stars[c.id]).length) sv[c.id] = Object.assign({}, stars[c.id]); });
+  return { comp: cur, missed: m, stars: sv, hand: [...hand], mode: (onBtn && onBtn.dataset.tab) || 'guide', savedAt: Date.now() };
+}
+function applyState(st){
+  if(!st) return;
+  if(typeof st.comp === 'number' && COMPS[st.comp]) cur = st.comp;
+  COMPS.forEach(c=> missed[c.id] = new Set((st.missed && st.missed[c.id]) || []));
+  stars = {};
+  if(st.stars) Object.keys(st.stars).forEach(k=>{ stars[k] = Object.assign({}, st.stars[k]); });
+  hand.clear(); (st.hand || []).forEach(k=>{ if(poolMap.get(k)) hand.add(k); });
+  renderSelector(); renderAll(); renderHand(); renderPool(); renderAdvice();
+  if(st.mode) segTab(st.mode);
+}
+if(window.Auth){
+  Auth.onReady(()=>{
+    const st = Auth.data('board', null);
+    if(st){ applyState(st); toast('已恢复上次进度', '选中的阵容、缺牌标记和手牌都回来了'); }
+    let last = JSON.stringify(snapState());
+    setInterval(()=>{
+      const s = snapState(), j = JSON.stringify(s);
+      if(j !== last){ Auth.save('board', s); last = j; }
+    }, 2000);
+    window.addEventListener('beforeunload', ()=> Auth.save('board', snapState()));
+  });
+}
+</script>
+<script>
+/* ============================================================
+   图鉴 · 装备合成 / 英雄羁绊
+   合成公式来源：腾讯新闻官方攻略《裁决95》《花仙小炮》《魔战士易大师》
+   《魔女拉克丝》《黑荆棘献祭流》装备表交叉验证（2026-11-10）
+   ============================================================ */
+(function(){
+'use strict';
+
+/* 基础散件（10 种合成原料） */
+const BASE = {
+  '暴风大剑':{s:'剑', d:'+攻击力。散件本身就能给英雄穿，两件合一起变成装。'},
+  '无用大棒':{s:'棒', d:'+法术强度。法系阵容的第一硬通货。'},
+  '反曲之弓':{s:'弓', d:'+攻击速度。攻速型物理 C 的命根子。'},
+  '女神之泪':{s:'泪', d:'+法力值，技能启动更快。'},
+  '锁子甲':{s:'甲', d:'+护甲，防物理伤害。'},
+  '负极斗篷':{s:'斗', d:'+魔法抗性，防法术伤害。'},
+  '巨人腰带':{s:'腰', d:'+生命上限。坦克阵容吃得最多。'},
+  '拳套':{s:'拳', d:'+暴击率和闪避。'},
+  '金铲铲':{s:'铲', d:'转职原料：和散件合成纹章，给英雄加羁绊。'},
+  '金锅锅':{s:'锅', d:'转职原料：和散件合成纹章，给英雄加羁绊。'}
+};
+
+/* 成装：r=两件散件 / null=神器无法合成，g=类别，d=一句话 */
+const ITDB = {
+  '死亡之刃':{r:['暴风大剑','暴风大剑'], g:'ad', d:'攻击力直接拉满，物理 C 万金油。'},
+  '无尽之刃':{r:['暴风大剑','拳套'], g:'ad', d:'暴击大幅提升，物理爆发核心。'},
+  '饮血剑':{r:['暴风大剑','负极斗篷'], g:'ad', d:'物理吸血边打边回，输出+容错。'},
+  '夜之锋刃':{r:['暴风大剑','锁子甲'], g:'ad', d:'开局法术护盾，防先手控制。'},
+  '斯特拉克的挑战护手':{r:['暴风大剑','巨人腰带'], g:'ad', d:'残血给大护盾，物理 C 的保命装。'},
+  '鬼索的狂暴之刃':{r:['反曲之弓','无用大棒'], g:'ad', d:'攻速无限叠加越打越快（俗称羊刀）。'},
+  '海妖之怒':{r:['反曲之弓','负极斗篷'], g:'ad', d:'叠加真实伤害，打肉快，攻速型 C 位。'},
+  '最后的轻语':{r:['反曲之弓','拳套'], g:'ad', d:'暴击+破甲，对面肉多就出它。'},
+  '红霸符':{r:['反曲之弓','反曲之弓'], g:'ad', d:'攻速+灼烧重伤，克制回复阵容。'},
+  '海克斯科技枪刃':{r:['暴风大剑','无用大棒'], g:'ap', d:'伤害附带法术吸血，AP 主 C 标配。'},
+  '虚空之杖':{r:['反曲之弓','女神之泪'], g:'ap', d:'法术穿透，对面魔抗高就出它。'},
+  '大天使之杖':{r:['无用大棒','女神之泪'], g:'ap', d:'法强随施法叠加，越打越疼。'},
+  '灭世者的死亡之帽':{r:['无用大棒','无用大棒'], g:'ap', d:'法强最大化，法系核弹（俗称大帽）。'},
+  '莫雷洛秘典':{r:['巨人腰带','无用大棒'], g:'ap', d:'技能附带灼烧+重伤。'},
+  '珠光护手':{r:['拳套','无用大棒'], g:'ap', d:'技能可以暴击，法系爆发。'},
+  '石像鬼石板甲':{r:['锁子甲','负极斗篷'], g:'def', d:'被越多敌人围攻越硬，主坦首选。'},
+  '圣盾使的誓约':{r:['锁子甲','女神之泪'], g:'def', d:'开局给相邻友军攻速光环。'},
+  '棘刺背心':{r:['锁子甲','锁子甲'], g:'def', d:'反伤，克制物理队（即荆棘之甲）。'},
+  '巨龙之爪':{r:['负极斗篷','负极斗篷'], g:'def', d:'魔抗大幅提升，克制法系队（俗称龙牙）。'},
+  '狂徒铠甲':{r:['巨人腰带','巨人腰带'], g:'def', d:'生命值直接堆满，纯血量肉度。'},
+  '振奋盔甲':{r:['巨人腰带','女神之泪'], g:'def', d:'团队续航向，治疗/护盾增益。'},
+  '日炎斗篷':{r:['锁子甲','巨人腰带'], g:'def', d:'持续灼烧+重伤周围敌人。'},
+  '泰坦的坚决':{r:['反曲之弓','锁子甲'], g:'def', d:'叠层加攻击法强，叠满获得控制免疫。'},
+  '适应性头盔':{r:['女神之泪','负极斗篷'], g:'def', d:'魔抗+法力回复，技能型坦克。'},
+  '冕卫':{r:['无用大棒','锁子甲'], g:'def', d:'法强与坦度兼顾的坦克装。'},
+  '朔极之矛':{r:['暴风大剑','女神之泪'], g:'util', d:'普攻回蓝更快，技能转得更勤（俗称青龙刀）。'},
+  '蓝霸符':{r:['女神之泪','女神之泪'], g:'util', d:'技能返还大量法力，连发技能。'},
+  '正义之手':{r:['女神之泪','拳套'], g:'util', d:'增伤或回蓝二选一，万金油功能装。'},
+  '窃贼手套':{r:['拳套','拳套'], g:'util', d:'随机生成两件成装，缺装备时的应急神器。'},
+  '强袭者的链枷':{r:['巨人腰带','拳套'], g:'util', d:'腰带+拳套合成，凯南/伊泽瑞尔的常见选择。'},
+  '裁决使纹章':{r:['金锅锅','拳套'], g:'emblem', d:'携带者获得裁决使羁绊。'},
+  '迅捷射手纹章':{r:['金锅锅','反曲之弓'], g:'emblem', d:'携带者获得迅捷射手羁绊。'},
+  '斗士纹章':{r:['金锅锅','巨人腰带'], g:'emblem', d:'携带者获得斗士羁绊。'},
+  '黑荆棘纹章':{r:['金铲铲','巨人腰带'], g:'emblem', d:'携带者获得黑荆棘羁绊。'},
+  '灵魂莲华纹章':{r:['金铲铲','无用大棒'], g:'emblem', d:'携带者获得灵魂莲华羁绊。'},
+  '神谕纹章':{r:null, g:'emblem', d:'携带者获得神谕羁绊（神器，无法用散件合成）。'},
+  '狂战士纹章':{r:null, g:'emblem', d:'携带者获得狂战士羁绊（神器，无法用散件合成）。'},
+  '翡翠配对':{r:null, g:'emblem', d:'特殊装备，常见于厄斐琉斯体系（神器）。'}
+};
+
+/* 别名归一：阵容里写的小名 → 标准名 */
+const ALIAS = {'青龙刀':'朔极之矛','龙爪':'巨龙之爪','荆棘之甲':'棘刺背心','羊刀':'鬼索的狂暴之刃','大帽':'灭世者的死亡之帽'};
+const canon = n => ALIAS[n] || n;
+
+const GCOL = {
+  ad:    {n:'物理输出', bg:'linear-gradient(150deg,#ff9b8a,#e8604f)'},
+  ap:    {n:'法系输出', bg:'linear-gradient(150deg,#c4a6ff,#8b63e8)'},
+  def:   {n:'坦克防御', bg:'linear-gradient(150deg,#8cc4ff,#4b86d6)'},
+  util:  {n:'功能',     bg:'linear-gradient(150deg,#7fe6d8,#33b3a0)'},
+  emblem:{n:'纹章',     bg:'linear-gradient(150deg,#ffd782,#e0a01f)'},
+  base:  {n:'基础散件', bg:'linear-gradient(150deg,#dfe8f4,#9fb2c9)'}
+};
+
+/* 装备小字标签补齐 */
+Object.assign(IT_SHORT, {'朔极之矛':'朔','棘刺背心':'棘','巨龙之爪':'爪','泰坦的坚决':'坦','日炎斗篷':'日','冕卫':'冕','纳什之牙':'纳'});
+const IS = n => { const c = canon(n); return IT_SHORT[c] || (BASE[c] ? BASE[c].s : c[0]); };
+
+
+/* 谁在用：装备 → [{阵容, 英雄, 全身装备}] */
+const USES = {};
+COMPS.forEach(c=> c.units.forEach(u=>{
+  if(u.syn) return;
+  (u.it||[]).forEach(x=>{ const k = canon(x.n); (USES[k] = USES[k]||[]).push({cn:c.name, hero:u.n, carry:!!u.carry, items:u.it||[]}); });
+}));
+
+/* ---- 弹层 ---- */
+let mask = null;
+function ensureMask(){
+  if(mask) return;
+  mask = document.createElement('div');
+  mask.className = 'mask';
+  mask.innerHTML = '<div class="pop"><button class="x" type="button">✕</button><div id="popBody"></div></div>';
+  document.body.appendChild(mask);
+  mask.addEventListener('click', e=>{
+    if(e.target === mask || e.target.classList.contains('x')) mask.classList.remove('on');
+  });
+}
+function openPop(html){ ensureMask(); document.getElementById('popBody').innerHTML = html; mask.classList.add('on'); }
+
+/* ---- 装备详情 ---- */
+function showItem(raw){
+  const n = canon(raw);
+  if(BASE[n]){
+    const made = Object.keys(ITDB).filter(k=> ITDB[k].r && ITDB[k].r.includes(n));
+    openPop(`<h3>${n}<span class="gtag" style="background:${GCOL.base.bg}">基础散件</span></h3>
+      <div class="pdesc">${BASE[n].d}</div>
+      <div class="sec">能合成这些成装（点开看路径）</div>
+      <div class="whocheds">${made.length ? made.map(k=>`<span class="wc" data-item="${k}" style="cursor:pointer">${k}</span>`).join('') : '<span class="wc">暂无</span>'}</div>`);
+    return;
+  }
+  const it = ITDB[n];
+  if(!it){
+    openPop(`<h3>${n}<span class="gtag" style="background:${GCOL.emblem.bg}">特殊装备</span></h3>
+      <div class="pdesc">神器 / 特殊装备：不能用散件合成，一般来自强化符文（如便携锻炉）或系统发放。</div>`);
+    return;
+  }
+  const g = GCOL[it.g];
+  const recipe = it.r ? `
+    <div class="recipe">
+      <div class="rcol"><div class="rbase">${itImgHTML(it.r[0])}</div><div class="rname">${it.r[0]}</div></div>
+      <div class="rop">+</div>
+      <div class="rcol"><div class="rbase">${itImgHTML(it.r[1])}</div><div class="rname">${it.r[1]}</div></div>
+      <div class="rop">→</div>
+      <div class="rcol"><div class="ritem" style="background:${g.bg}">${itImgHTML(n)}</div><div class="rname"><b style="color:var(--gold)">${n}</b></div></div>
+    </div>` : `<div class="pdesc" style="color:var(--gold)">神器：不能用散件合成，来自强化符文或系统发放。</div>`;
+  const users = USES[n] || [];
+  openPop(`<h3>${n}<span class="gtag" style="background:${g.bg}">${g.n}</span></h3>
+    ${recipe}
+    <div class="pdesc">${it.d}</div>
+    <div class="sec">17 套阵容里谁要它 · 点小图标看其他装备</div>
+    ${users.length ? users.map(x=>`
+      <div class="compline">
+        <span class="cn"><b style="color:var(--gold)">${x.hero}</b>${x.carry?'（主C）':''} · ${x.cn}</span>
+        <span class="whitems">${x.items.map(i=>`<span class="it ${i.k}" data-item="${i.n}" title="${i.n}">${itImgHTML(i.n)}</span>`).join('')}</span>
+      </div>`).join('') : '<div class="whocheds"><span class="wc">当前阵容库暂未用到，可按需灵活合成</span></div>'}`);
+}
+
+/* ---- 英雄详情 ---- */
+function showHero(name){
+  const p = poolMap.get(name);
+  if(!p) return;
+  const uses = [];
+  COMPS.forEach(c=> c.units.forEach(u=>{ if(!u.syn && u.n === name) uses.push({c, u}); }));
+  const tgt = p.c >= 4 ? '二星' : '三星';
+  openPop(`<div class="hpop-top">
+      ${imgHTML(p)}
+      <div style="min-width:0">
+        <h3 style="margin:0 0 5px">${p.n}</h3>
+        <div class="pdesc" style="margin:0"><b style="color:${COST_COLOR[p.c]}">${COST_NAME[p.c]}</b> · 通常养到 <b style="color:var(--gold)">${tgt}</b>${p.in.length?` · <b style="color:var(--gold)">${p.in.length}</b> 套阵容在用`:''}</div>
+      </div>
+    </div>
+    <div class="sec">羁绊（牵绊）</div>
+    <div class="traits">${[...p.traits].map(t=>`<span class="tt">${t}</span>`).join('')}</div>
+    ${uses.length ? `<div class="sec">登场阵容与该带什么装备 · 点装备看合成路径</div>
+      ${uses.map(x=>`
+      <div class="compline">
+        <span class="cn">${x.c.name}${x.u.carry?' · <b style="color:var(--gold)">主C</b>':''}</span>
+        <span class="whitems">${(x.u.it||[]).map(i=>`<span class="it ${i.k}" data-item="${i.n}" title="${i.n}">${itImgHTML(i.n)}</span>`).join('') || '<span style="font-size:11px;color:var(--faint)">捡剩余散件</span>'}</span>
+      </div>`).join('')}` : '<div class="pdesc">当前 17 套阵容没有它的位置——手上来了可以当打工牌过渡。</div>'}`);
+}
+
+/* ---- 全局点击代理（capture 阶段拦截，不触发缺牌标记） ---- */
+document.addEventListener('click', e=>{
+  const itEl = e.target.closest('.it[data-item], .bchip[data-item], .dchip[data-item], .wc[data-item]');
+  if(itEl){ e.stopPropagation(); showItem(itEl.dataset.item); return; }
+  const hEl = e.target.closest('[data-hero]');
+  if(hEl){ e.stopPropagation(); showHero(hEl.dataset.hero); }
+}, true);
+
+/* ---- 图鉴渲染 ---- */
+function renderDex(){
+  const bx = document.getElementById('dexBase');
+  if(!bx) return;
+  bx.innerHTML = Object.keys(BASE).map(n=>`
+    <div class="bchip" data-item="${n}"><div class="bi">${itImgHTML(n)}</div><div class="bn">${n}</div></div>`).join('');
+  const groups = document.getElementById('dexGroups');
+  groups.innerHTML = ['ad','ap','def','util','emblem'].map(g=>{
+    const list = Object.keys(ITDB).filter(n=> ITDB[n].g === g);
+    return `<div class="dexh" style="margin-top:12px">${GCOL[g].n}</div>
+      <div class="dexgrid">${list.map(n=>{
+        const it = ITDB[n];
+        const recipe = it.r ? `<span class="mini" style="background:${GCOL.base.bg}">${itImgHTML(it.r[0])}</span>+<span class="mini" style="background:${GCOL.base.bg}">${itImgHTML(it.r[1])}</span>` : '<span class="mini" style="background:#3a4457;color:#9fb2c9">神</span>';
+        return `<div class="dchip" data-item="${n}">
+          <div class="di" style="background:${GCOL[g].bg}">${itImgHTML(n)}</div>
+          <div class="dt"><b>${n}</b><span>${recipe} ${it.r ? it.r[0]+' + '+it.r[1] : '神器'}</span></div>
+        </div>`;
+      }).join('')}</div>`;
+  }).join('');
+}
+
+/* ---- 英雄图鉴渲染 ---- */
+let heroCost = 0;
+function renderHeroes(){
+  const fl = document.getElementById('hFilter');
+  if(!fl) return;
+  fl.innerHTML = [0,1,2,3,4,5].map(c=>`<button type="button" class="${heroCost===c?'on':''}" data-c="${c}">${c===0?'全部':COST_NAME[c]}</button>`).join('');
+  fl.querySelectorAll('button').forEach(b=>{ b.addEventListener('click', ()=>{ heroCost = +b.dataset.c; renderHeroes(); }); });
+  const wrap = document.getElementById('heroWrap');
+  wrap.innerHTML = [1,2,3,4,5].map(c=>{
+    const g = POOL.filter(p=> p.c === c && (!heroCost || heroCost === c));
+    if(!g.length) return '';
+    return `<div class="poolgroup">
+      <div class="gl"><i style="background:${COST_COLOR[c]}"></i>${COST_NAME[c]} · ${g.length} 个</div>
+      <div class="herogrid">${g.map(p=>`
+        <div class="hcard" data-hero="${p.n}" data-cost="${p.c}" title="${p.n}｜${[...p.traits].join('·')}">
+          ${imgHTML(p)}
+          <div class="hn">${p.n}</div>
+          ${p.in.length?`<div class="hin">${p.in.length} 套在用</div>`:'<div class="hin" style="color:var(--faint)">打工牌</div>'}
+        </div>`).join('')}</div></div>`;
+  }).join('');
+}
+
+renderDex();
+renderHeroes();
+})();
+</script>
+<script src="install.js"></script>
+</body>
+</html>
