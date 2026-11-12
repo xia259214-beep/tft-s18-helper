@@ -3451,6 +3451,8 @@ function renderHeroes(){
   }).join('');
 }
 
+window.BASE = BASE;   /* 修复：跨脚本块的装备兜底引用（BASE 原本被闭包私有化，导致部分阵容点开渲染中断） */
+window.IS = IS;
 renderDex();
 renderHeroes();
 })();
