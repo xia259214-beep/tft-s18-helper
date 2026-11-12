@@ -14,27 +14,36 @@
     oauthRelayBaseUrl: 'https://www.workbuddy.cn/v2/as/genie-baas/oauth',
     publishableKey: 'wbpk_UqlwTlB9IcnTvgEVE0lAdH_VmvW6qc8a6FKk12573AgxtFzwcCa8NRE'
   };
-  const SDK_URL = 'https://cdn.jsdelivr.net/npm/@tencent-ai/workbuddy-cloud-sdk@dev/lib/index.global.js';
+  /* SDK 优先用本站自托管副本（国内最稳），失败再降级外部 CDN */
+  const SDK_URLS = [
+    './cloud-sdk.js',
+    'https://cdn.jsdelivr.net/npm/@tencent-ai/workbuddy-cloud-sdk@dev/lib/index.global.js',
+    'https://unpkg.com/@tencent-ai/workbuddy-cloud-sdk@dev/lib/index.global.js'
+  ];
   const TABLE = 'tft_profiles';
 
-  /* ---------- SDK 动态加载 ---------- */
+  /* ---------- SDK 动态加载（带 CDN 降级链） ---------- */
   let cloudPromise = null;
+  function injectScript(url) {
+    return new Promise((resolve, reject) => {
+      const s = document.createElement('script');
+      s.src = url;
+      s.onload = () => resolve();
+      s.onerror = () => reject(new Error('load-fail: ' + url));
+      document.head.appendChild(s);
+      setTimeout(() => { if (!window.WorkBuddyCloud) reject(new Error('timeout: ' + url)); }, 12000);
+    });
+  }
   function loadCloud() {
     if (cloudPromise) return cloudPromise;
-    cloudPromise = new Promise((resolve, reject) => {
-      if (window.WorkBuddyCloud && window.WorkBuddyCloud.createWorkBuddyCloud) {
-        resolve(makeCloud());
-        return;
+    cloudPromise = (async () => {
+      if (window.WorkBuddyCloud && window.WorkBuddyCloud.createWorkBuddyCloud) return makeCloud();
+      for (let i = 0; i < SDK_URLS.length; i++) {
+        try { await injectScript(SDK_URLS[i]); } catch (e) { continue; }
+        if (window.WorkBuddyCloud && window.WorkBuddyCloud.createWorkBuddyCloud) return makeCloud();
       }
-      const s = document.createElement('script');
-      s.src = SDK_URL;
-      s.onload = () => {
-        try { resolve(makeCloud()); } catch (e) { reject(e); }
-      };
-      s.onerror = () => reject(new Error('云服务脚本加载失败，请检查网络后刷新'));
-      document.head.appendChild(s);
-      setTimeout(() => { if (!window.WorkBuddyCloud) reject(new Error('云服务连接超时，请检查网络后刷新')); }, 20000);
-    });
+      throw new Error('云服务脚本加载失败，请检查网络后刷新');
+    })();
     return cloudPromise;
   }
   function makeCloud() {
@@ -84,22 +93,70 @@
   /* ---------- 云端账号操作 ---------- */
   let cloud = null;
 
+  /* 当前打开环境：微信内置浏览器 / 手机 / 桌面 */
+  function envInfo() {
+    const ua = navigator.userAgent || '';
+    const wechat = /MicroMessenger/i.test(ua);
+    const mobile = !wechat && /Android|iPhone|iPad|iPod|Mobile|HarmonyOS/i.test(ua);
+    return { wechat, mobile };
+  }
+
   /* 第三方一键登录：跳到中转页授权，回来后由 boot() 里的回调处理收尾 */
   async function oauthSignIn(provider) {
     const err = document.getElementById('authErr');
     const go = document.getElementById('authGo');
-    if (err) err.textContent = '';
+    if (err) { err.textContent = ''; err.style.color = ''; }
+    const env = envInfo();
+    /* 微信扫码只能在电脑上完成：微信内打开 / 手机浏览器先给提示，别让人白跳一趟 */
+    if (provider === 'wechat' && env.wechat) {
+      if (err) { err.style.color = '#e8b04b'; err.textContent = T('a_wx_inwechat'); }
+      return;
+    }
+    if (provider === 'wechat' && env.mobile) {
+      if (err) { err.style.color = '#e8b04b'; err.textContent = T('a_wx_mobile'); }
+      return;
+    }
     if (go) { go.disabled = true; go.textContent = T('a_wait'); }
     try {
       const r = await cloud.auth.signInWithOAuth({ provider, redirectTo: location.href });
       if (r.error) throw friendly(r.error, '登录跳转失败');
       const url = r.data && r.data.url;
       if (!url) throw new Error('没有拿到登录跳转地址');
+      if (provider === 'wechat') {
+        /* 桌面上新开一个窗扫码：主页面不跳走（PWA 独立窗口里也不会变空白页） */
+        const w = window.open(url, 'tftWxOauth', 'width=460,height=680,menubar=no,toolbar=no,location=no,status=no');
+        if (w) {
+          if (err) { err.style.color = '#e8b04b'; err.textContent = T('a_wx_popup'); }
+          if (go) { go.disabled = false; go.textContent = T('a_go_login'); }
+          watchOauthWindow(w);
+          return;
+        }
+      }
       location.href = url;
     } catch (e) {
-      if (err) err.textContent = e.message || '登录失败';
+      if (err) { err.style.color = ''; err.textContent = e.message || '登录失败'; }
       if (go) { go.disabled = false; go.textContent = T('a_go_login'); }
     }
+  }
+
+  /* 扫码窗口：扫完回到本页时自动收会话，省得用户自己找刷新 */
+  function watchOauthWindow(w) {
+    let done = false;
+    const check = async () => {
+      if (done || !cloud) return;
+      try {
+        const { data } = await cloud.auth.getSession();
+        const sess = data && data.session ? data.session : (data || null);
+        if (sess && sess.user) {
+          done = true;
+          try { if (w && !w.closed) w.close(); } catch (e) {}
+          finishAuth(sess.user, null);
+        }
+      } catch (e) {}
+    };
+    const onFocus = () => { setTimeout(check, 600); };
+    window.addEventListener('focus', onFocus);
+    setTimeout(() => { if (!done) window.removeEventListener('focus', onFocus); }, 300000);
   }
 
   /* 从中转页跳回来：URL 上带着回调参数，交给 SDK 换会话 */
@@ -224,56 +281,68 @@
   /* ---------- 门禁界面 ---------- */
   const CSS = `
   #authGate{position:fixed; inset:0; z-index:9999; display:flex; align-items:center; justify-content:center;
-    background:radial-gradient(900px 500px at 50% 0%,#1b2337,#080b12 70%); padding:20px;}
+    background:
+      radial-gradient(1100px 560px at 50% -8%, rgba(90,169,255,.10), transparent 62%),
+      radial-gradient(900px 480px at 100% 100%, rgba(245,185,66,.05), transparent 55%),
+      #0a0e16;
+    padding:20px;}
   #authGate.hide{opacity:0; pointer-events:none; transition:opacity .35s;}
-  .authcard{width:100%; max-width:392px; background:#141a26; border:1px solid #2a3247; border-radius:20px;
-    padding:30px 26px 22px; box-shadow:0 30px 80px rgba(0,0,0,.6); font-family:"PingFang SC","Microsoft YaHei",system-ui,sans-serif;}
-  .authbrand{text-align:center; margin-bottom:20px;}
-  .authbrand h1{font-size:24px; letter-spacing:5px; font-weight:800; margin:0;
-    background:linear-gradient(120deg,#f6d67c,#f0b544,#c98a2a); -webkit-background-clip:text; background-clip:text; color:transparent;}
-  .authbrand p{color:#7d879e; font-size:12px; margin:8px 0 0; letter-spacing:1px;}
-  .authtabs{display:flex; background:#0f141f; border:1px solid #232b3d; border-radius:12px; padding:4px; margin-bottom:18px;}
-  .authtabs button{flex:1; padding:9px 0; border:0; border-radius:9px; background:transparent; color:#8b96ad;
-    font-size:13px; cursor:pointer; font-family:inherit; transition:.15s;}
-  .authtabs button.on{background:#1f2940; color:#f0b544; font-weight:600;}
-  .authfield{margin-bottom:12px;}
-  .authfield label{display:block; color:#828da4; font-size:11.5px; margin-bottom:6px; letter-spacing:.5px;}
-  .authfield label .auth-tip{color:#5c6478; font-size:10.5px; letter-spacing:0; margin-left:6px;}
-  .authfield input{width:100%; box-sizing:border-box; background:#0f141f; border:1px solid #262f44; color:#e8ecf4;
-    border-radius:10px; padding:11px 12px; font-size:14px; font-family:inherit; outline:none;}
-  .authfield input:focus{border-color:#f0b544; box-shadow:0 0 0 3px rgba(240,181,68,.12);}
+  .authcard{width:100%; max-width:392px; background:rgba(22,28,40,.72); border:1px solid rgba(255,255,255,.10);
+    border-radius:24px; padding:32px 28px 24px; box-shadow:0 32px 90px rgba(0,0,0,.55);
+    backdrop-filter:blur(22px) saturate(150%); -webkit-backdrop-filter:blur(22px) saturate(150%);
+    font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",system-ui,sans-serif;}
+  .authbrand{text-align:center; margin-bottom:22px;}
+  .authbrand h1{font-size:23px; letter-spacing:4px; font-weight:800; margin:0;
+    background:linear-gradient(150deg,#f8dfa0,#f0b544,#d29a35); -webkit-background-clip:text; background-clip:text; color:transparent;}
+  .authbrand p{color:#8a93a8; font-size:12px; margin:8px 0 0; letter-spacing:.5px;}
+  .authtabs{display:flex; background:rgba(10,14,22,.6); border:1px solid rgba(255,255,255,.08); border-radius:14px; padding:4px; margin-bottom:20px;}
+  .authtabs button{flex:1; padding:9px 0; border:0; border-radius:11px; background:transparent; color:#8b96ad;
+    font-size:13px; cursor:pointer; font-family:inherit; transition:.18s;}
+  .authtabs button.on{background:rgba(240,181,68,.16); color:#f5c35c; font-weight:700;}
+  .authfield{margin-bottom:13px;}
+  .authfield label{display:block; color:#8a93a8; font-size:11.5px; margin-bottom:6px; letter-spacing:.3px;}
+  .authfield label .auth-tip{color:#5d6679; font-size:10.5px; letter-spacing:0; margin-left:6px;}
+  .authfield input{width:100%; box-sizing:border-box; background:rgba(10,14,22,.55); border:1px solid rgba(255,255,255,.09); color:#eef2f8;
+    border-radius:12px; padding:12px 14px; font-size:14.5px; font-family:inherit; outline:none; transition:border-color .15s, box-shadow .15s;}
+  .authfield input::placeholder{color:#525c70;}
+  .authfield input:focus{border-color:rgba(240,181,68,.65); box-shadow:0 0 0 4px rgba(240,181,68,.10); background:rgba(10,14,22,.75);}
   .otprow{display:flex; gap:8px;}
   .otprow input{flex:1; min-width:0;}
-  .otprow button{flex:0 0 auto; border:1px solid #2f3a52; background:#182032; color:#f0b544; border-radius:10px;
-    padding:0 12px; font-size:12.5px; cursor:pointer; font-family:inherit;}
-  .otprow button:disabled{color:#5c6478; cursor:default;}
+  .otprow button{flex:0 0 auto; border:1px solid rgba(240,181,68,.35); background:rgba(240,181,68,.10); color:#f5c35c; border-radius:12px;
+    padding:0 14px; font-size:12.5px; cursor:pointer; font-family:inherit; transition:.15s;}
+  .otprow button:hover:not(:disabled){background:rgba(240,181,68,.18);}
+  .otprow button:disabled{color:#5d6679; cursor:default; border-color:rgba(255,255,255,.08); background:transparent;}
   .authlinks{display:flex; justify-content:space-between; margin-top:10px; font-size:12px;}
-  .authlinks a{color:#7d879e; cursor:pointer; text-decoration:none;}
-  .authlinks a:hover{color:#f0b544;}
-  .authbtn{width:100%; margin-top:8px; padding:12px 0; border:0; border-radius:11px; cursor:pointer;
-    background:linear-gradient(120deg,#f6d67c,#f0b544); color:#241a04; font-size:14.5px; font-weight:700; font-family:inherit;}
+  .authlinks a{color:#8a93a8; cursor:pointer; text-decoration:none; transition:.15s;}
+  .authlinks a:hover{color:#f5c35c;}
+  .authbtn{width:100%; margin-top:8px; padding:13px 0; border:0; border-radius:13px; cursor:pointer;
+    background:linear-gradient(150deg,#f8dfa0,#f0b544 60%,#e3a437); color:#241a04; font-size:14.5px; font-weight:700; font-family:inherit;
+    box-shadow:0 8px 24px rgba(240,181,68,.22); transition:.15s;}
+  .authbtn:hover:not(:disabled){filter:brightness(1.05);}
   .authbtn:disabled{opacity:.55; cursor:default;}
-  .autherr{min-height:18px; color:#e5534b; font-size:12px; margin-top:10px; line-height:1.5;}
+  .autherr{min-height:18px; color:#ff7b72; font-size:12px; margin-top:10px; line-height:1.5;}
   .authact{margin-top:8px;}
-  .authact button{width:100%; padding:10px 0; border:1px solid #3a4460; background:#1a2233; color:#f0b544;
-    border-radius:10px; font-size:13px; cursor:pointer; font-family:inherit;}
-  .authact button:hover{background:#212b40;}
-  .authhint{margin-top:8px; color:#5c6478; font-size:11px; line-height:1.6;}
-  .oauthrow{display:flex; gap:8px; margin-top:12px;}
-  .oauthrow button{flex:1; padding:11px 0; border:1px solid #3a4460; background:#1a2233; color:#e8ecf4;
-    border-radius:10px; font-size:13px; font-weight:600; cursor:pointer; font-family:inherit;}
-  .oauthrow button:hover{background:#212b40; border-color:#f0b544;}
+  .authact button{width:100%; padding:11px 0; border:1px solid rgba(240,181,68,.4); background:rgba(240,181,68,.08); color:#f5c35c;
+    border-radius:12px; font-size:13px; cursor:pointer; font-family:inherit; transition:.15s;}
+  .authact button:hover{background:rgba(240,181,68,.16);}
+  .oauthrow{display:flex; gap:9px; margin-top:12px;}
+  .oauthrow button{flex:1; padding:12px 0; border:1px solid rgba(255,255,255,.12); background:rgba(255,255,255,.05); color:#eef2f8;
+    border-radius:13px; font-size:13px; font-weight:600; cursor:pointer; font-family:inherit; transition:.15s;}
+  .oauthrow button:hover{background:rgba(255,255,255,.09); border-color:rgba(240,181,68,.5);}
   .oauthrow button:disabled{opacity:.55; cursor:default;}
-  .authdiv{display:flex; align-items:center; gap:10px; margin:14px 0 0; color:#5c6478; font-size:11px;}
-  .authdiv::before,.authdiv::after{content:''; flex:1; height:1px; background:#212a3c;}
-  .authnote{margin-top:14px; padding-top:14px; border-top:1px solid #212a3c; color:#66708a; font-size:11px; line-height:1.7;}
+  .authdiv{display:flex; align-items:center; gap:10px; margin:15px 0 0; color:#5d6679; font-size:11px;}
+  .authdiv::before,.authdiv::after{content:''; flex:1; height:1px; background:rgba(255,255,255,.07);}
+  .authhint{margin-top:8px; color:#79828f; font-size:11px; line-height:1.65;}
+  .authhint b{color:#e8b04b; font-weight:600;}
+  .authnote{margin-top:15px; padding-top:15px; border-top:1px solid rgba(255,255,255,.07); color:#6a7488; font-size:11px; line-height:1.75;}
   #userChip{position:fixed; top:12px; right:14px; z-index:900; display:flex; align-items:center; gap:8px;
-    background:rgba(20,26,38,.92); border:1px solid #2a3247; border-radius:999px; padding:5px 6px 5px 12px;
-    font-family:"PingFang SC","Microsoft YaHei",system-ui,sans-serif; font-size:12px; color:#c3cbdb; backdrop-filter:blur(6px);}
-  #userChip b{color:#f0b544; font-weight:600;}
-  #userChip button{border:0; background:#1e2637; color:#8b96ad; border-radius:999px; padding:5px 10px;
-    font-size:11.5px; cursor:pointer; font-family:inherit;}
-  #userChip button:hover{color:#e5534b;}
+    background:rgba(22,28,40,.78); border:1px solid rgba(255,255,255,.10); border-radius:999px; padding:5px 6px 5px 13px;
+    font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",system-ui,sans-serif; font-size:12px; color:#c8d0de;
+    backdrop-filter:blur(16px) saturate(140%); -webkit-backdrop-filter:blur(16px) saturate(140%);}
+  #userChip b{color:#f5c35c; font-weight:600;}
+  #userChip button{border:0; background:rgba(255,255,255,.07); color:#8b96ad; border-radius:999px; padding:5px 11px;
+    font-size:11.5px; cursor:pointer; font-family:inherit; transition:.15s;}
+  #userChip button:hover{color:#ff7b72; background:rgba(255,255,255,.10);}
   @media (max-width:520px){ .authcard{padding:24px 20px 18px;} }
   `;
 
@@ -329,6 +398,7 @@
         </div>
         <div class="authdiv"><span data-i18n="a_or">或用邮箱</span></div>
         <div class="autherr" id="authErr"></div>
+        <div class="authhint" data-i18n="a_wx_tip">微信登录会在新窗口里出二维码，手机微信扫一下就好。扫码页打不开、或提示「浏览器不支持」→ 换 Chrome / Edge 打开，或者直接用下面邮箱登录。</div>
         <div class="authact" id="authAct"></div>
         <div class="authlinks" id="links"></div>
         <div class="authnote">
@@ -508,6 +578,13 @@
     renderChip(user);
     readyCbs.forEach(cb => { try { cb(user); } catch (e) { console.warn(e); } });
     readyCbs = [];
+    /* 微信扫码是在新窗口里完成的：登录成功后把原来那个窗口刷新一下，再把扫码窗关掉 */
+    try {
+      if (window.name === 'tftWxOauth' && window.opener && !window.opener.closed) {
+        try { window.opener.location.reload(); } catch (e) {}
+        setTimeout(() => { try { window.close(); } catch (e) {} }, 600);
+      }
+    } catch (e) {}
   }
 
   function renderChip(user) {
@@ -549,6 +626,7 @@
       if (me) { try { cb(me); } catch (e) {} }
       else readyCbs.push(cb);
     },
+    cloudReady: loadCloud,   /* 供页面复用云端客户端（LLM 识别等） */
     data: dataGet,
     save: dataSet,
     flush: flush,

@@ -24,7 +24,19 @@
     deferred = e;
     scheduleShow();
   });
-  window.addEventListener('appinstalled', removeBar);
+  window.addEventListener('appinstalled', function(){
+    try { localStorage.setItem(DISMISS_KEY + '_forever', '1'); } catch(e){}
+    removeBar();
+  });
+  /* 已安装的（Chrome/Edge 可直接查到）绝不再提示 */
+  if (navigator.getInstalledRelatedApps) {
+    navigator.getInstalledRelatedApps().then(function(apps){
+      if (apps && apps.length) {
+        try { localStorage.setItem(DISMISS_KEY + '_forever', '1'); } catch(e){}
+        removeBar();
+      }
+    }).catch(function(){});
+  }
 
   // 登录门盖在最上层（z-index 9999），等它消失再提示
   function afterGate(cb){
@@ -38,12 +50,20 @@
 
   function dismissed(){
     try {
+      /* 安装过（或关过两次）就永久不再弹，只留 appinstalled 兼底 */
+      if (localStorage.getItem(DISMISS_KEY + '_forever')) return true;
+      var n = parseInt(localStorage.getItem(DISMISS_KEY + '_n') || '0', 10);
+      if (n >= 2) return true;
       var t = parseInt(localStorage.getItem(DISMISS_KEY) || '0', 10);
-      return t && (Date.now() - t < 24 * 3600 * 1000);   // 关掉后隔一天再提示，别烦人
+      return t && (Date.now() - t < 72 * 3600 * 1000);   // 关掉后隔三天再提示
     } catch(e){ return false; }
   }
   function markDismissed(){
-    try { localStorage.setItem(DISMISS_KEY, String(Date.now())); } catch(e){}
+    try {
+      localStorage.setItem(DISMISS_KEY, String(Date.now()));
+      var n = parseInt(localStorage.getItem(DISMISS_KEY + '_n') || '0', 10);
+      localStorage.setItem(DISMISS_KEY + '_n', String(n + 1));
+    } catch(e){}
   }
 
   function scheduleShow(){

@@ -332,12 +332,14 @@
   </section>
 
   <div class="foot">
-    <span data-i18n="mn_foot1">数据来源：国服 18.6 版本游戏内数据文件；第三方统计站 tftcodex.com Diamond+ 排位样本（2026-11-10，近 6 天）。</span>
+    <span data-i18n="mn_foot1">数据来源：国服 18.6 版本游戏内数据文件；第三方统计站 tftcodex.com Diamond+ 排位样本（2026-11-11，近 6 天）。</span>
     <span data-i18n="mn_foot2">阵容强度会随热更新变动。</span><b data-i18n="mn_foot3">阵容码</b><span data-i18n="mn_foot4">可粘贴进游戏内「队伍规划器」一键导入，导入后按站位图手动摆位。</span>
   </div>
 </div>
 
 <script src="i18n.js"></script>
+<script src="pos.js"></script>
+<script src="stats.js"></script>
 <script src="auth.js"></script>
 <script>
 /* =========================================================
@@ -347,7 +349,7 @@
    ========================================================= */
 const COMPS = [
   {
-    id:'draven', name:'巨龙德莱文', tier:'S', avg:4.15, top4:53.7, win:24.3, games:93440, pick:8.2,
+    id:'draven', name:'巨龙德莱文', tier:'S', avg:4.15, top4:53.7, win:24.1, games:119768, pick:8.3,
     pop:'9 人口 / 只站 8 张牌', style:'快九 · 攒钱一波搜',
     code:'024153ed43042840b3fc4043fb000000TFTSet18',
     traits:[['峡谷野怪',3],['地狱火',2],['主宰',2],['重装战士',2],['顶级掠食者',1],['赏金猎人',1],['翠神',1],['远古树精',1],['宝石骑士',1]],
@@ -369,7 +371,7 @@ const COMPS = [
     note:'这套的强度来自八个高费棋子各自的技能，羁绊只是胶水。地狱火、主宰、重装全停在最低档，别为了拉高某一条羁绊拆人。'
   },
   {
-    id:'forest', name:'永森德莱文', tier:'S', avg:4.20, top4:52.7, win:22.4, games:47689, pick:4.2,
+    id:'forest', name:'永森德莱文', tier:'S', avg:4.18, top4:53.0, win:22.4, games:59308, pick:4.1,
     pop:'9 人口', style:'快九 · 永森经济线',
     code:'（暂无校验过的阵容码，按站位表手动摆）',
     traits:[['永恒之森',3],['斗士',2],['裁决使',2]],
@@ -388,7 +390,7 @@ const COMPS = [
     note:'这是巨龙德莱文的退路，两份数据里共用同一个 C 和同一套装备，什么牌先来走哪条。'
   },
   {
-    id:'riftbeast', name:'峡谷树怪', tier:'S', avg:4.19, top4:55.7, win:14.0, games:85564, pick:7.5,
+    id:'riftbeast', name:'峡谷树怪', tier:'S', avg:4.19, top4:55.6, win:13.8, games:110608, pick:7.7,
     pop:'8 人口', style:'八级开搜',
     code:'（暂无校验过的阵容码，按站位表手动摆）',
     traits:[['峡谷野怪',3],['主宰',2],['重装战士',2]],
@@ -406,7 +408,7 @@ const COMPS = [
     note:'样本量全场前三（85,564 局）。它前四率 55.7% 是九套里最高的——稳到几乎不空车，但吃鸡率只有 14%，登顶靠的是后面几轮的运营细节。想要稳定上分选它，想吃鸡把每回合的对位摆进去。'
   },
   {
-    id:'yunara', name:'日蚀芸阿娜', tier:'A', avg:4.38, top4:53.0, win:13.6, games:67263, pick:5.9,
+    id:'yunara', name:'日蚀芸阿娜', tier:'A', avg:4.38, top4:53.0, win:13.4, games:86216, pick:6.0,
     pop:'7 人口 / 五级开搜', style:'一费赌狗 · 五级停手',
     code:'0241142743a40a41040743b000000000TFTSet18',
     traits:[['日蚀骑士',3],['花仙子',3]],
@@ -427,7 +429,7 @@ const COMPS = [
     note:'67,263 局，A 档里玩得最多的一套，但它不是 S 档。人多、名次中上、还不上扬——说明这是沉下来的常规解法，不是被带火的新套路。日蚀骑士的精髓是按三星数量把额外魔法伤害换成真实伤害，所以追三就是强度本身。'
   },
   {
-    id:'ahri', name:'神谕阿狸', tier:'A', avg:4.38, top4:52.9, win:11.6, games:50542, pick:4.5,
+    id:'ahri', name:'神谕阿狸', tier:'A', avg:4.38, top4:52.9, win:11.5, games:63085, pick:4.4,
     pop:'8 人口', style:'Fast 8 · 四阶段开搜',
     code:'0243042840f42a4294073e9418000000TFTSet18',
     traits:[['神谕',4],['灵魂莲华',3],['峡谷野怪',3]],
@@ -446,7 +448,7 @@ const COMPS = [
     note:'核心机制：神谕 4 档是「队伍 2 点法力回复、神谕 6 点」。多数人只看到神谕自己从 4 跳到 6，真正被漏掉的是全队那一列从 1 变 2——场上不戴章的七个人，回蓝一起翻倍。'
   },
   {
-    id:'zyra', name:'主宰婕拉', tier:'B', avg:4.51, top4:49.8, win:11.3, games:24360, pick:2.1,
+    id:'zyra', name:'主宰婕拉', tier:'B', avg:4.51, top4:49.7, win:11.2, games:31315, pick:2.2,
     pop:'8 人口', style:'八级开搜',
     code:'0242043a4273ed43742641b43c000000TFTSet18',
     traits:[['主宰',6],['荆棘之兴',1],['召唤师',1],['野兽之灵',1],['魔战士',1]],
@@ -468,7 +470,7 @@ const COMPS = [
     note:'装备表第一眼很像写错了：主 C 三件里两件大天使、一件科技枪，一件纯输出都没有。但逻辑是通的——只要前排撑够时间，大天使自己会把法强叠上去，科技枪保证她不死。'
   },
   {
-    id:'nidalee', name:'兽灵奈德丽', tier:'A', avg:4.42, top4:53.0, win:8.1, games:35394, pick:3.1,
+    id:'nidalee', name:'兽灵奈德丽', tier:'A', avg:4.45, top4:52.4, win:8.1, games:46380, pick:3.2,
     pop:'8 人口', style:'Fast 8 · 八条二档',
     code:'0242042842b3ed41240e41b42c000000TFTSet18',
     traits:[['魔战士',2],['护卫',2],['花仙子',2],['地狱火',2],['神谕',2],['重装战士',2],['主宰',2],['野兽之灵',2],['帝王斑蝶',1],['猎人',1]],
@@ -490,7 +492,7 @@ const COMPS = [
     note:'这套没有一个超过 2 档的羁绊，它把八条羁绊的第一档一次买齐，用八份小属性叠成一个整体。好处是抗刀——18.5 砍了四费主 C 好几轮，这种散装结构反而不容易被一刀砍废。'
   },
   {
-    id:'aphelios', name:'重装厄斐琉斯', tier:'B', avg:4.62, top4:48.9, win:6.7, games:3367, pick:0.3,
+    id:'aphelios', name:'重装厄斐琉斯', tier:'B', avg:4.62, top4:48.4, win:6.7, games:4470, pick:0.3,
     pop:'8 人口', style:'八级开搜 · 塔里克连线',
     code:'024034303fa4283f343c4223ef000000TFTSet18',
     traits:[['重装战士',4],['峡谷野怪',3],['月蚀',2],['迅捷射手',2],['狂战士',2],['召唤师',2],['荆棘之兴',1],['宝石骑士',1]],
@@ -643,7 +645,11 @@ function renderDetail(i){
     </table>
 
     <div class="blk"><h4>怎么打（运营节奏）</h4><p>${c.flow}</p></div>
-    <div class="blk"><h4>站位</h4><p>${c.pos}</p></div>
+    <div class="blk"><h4>站位</h4><p>${c.pos}</p>${
+      (window.TFT_POS && TFT_POS.POS[c.id])
+        ? TFT_POS.posPanelHTML(TFT_POS.POS[c.id], { units: c.units })
+        : ''
+    }</div>
 
     <div class="blk"><h4>海克斯怎么选</h4>
       ${c.aug.top?.length ? `<div style="margin-bottom:5px"><span style="font-size:11.5px;color:var(--faint)">优先：</span>${c.aug.top.map(a=>`<span class="pill">${a}</span>`).join('')}</div>` : ''}
