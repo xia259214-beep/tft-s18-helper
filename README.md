@@ -4,14 +4,14 @@
 
 抓到什么牌点什么，实时告诉你该走哪套阵容；缺谁点谁，立刻给替代方案和转线路径；经济、血量、海克斯三条线一起算，帮你把"这局怎么赢"想清楚。
 
-> 🌐 **在线使用**：<https://rng-chovy.github.io/tft-s18-helper/>
+> 🌐 **在线使用**：<https://tft-s18-helper.app.workbuddy.host/?sharecode=WMGGSW3OBW>
 > 📱 手机浏览器直接打开即可，也支持「添加到主屏幕」当作 App 用（PWA）。
 
 ---
 
 ## ✨ 三大功能
 
-### 1️⃣ 作战台 · [`board.html`](https://rng-chovy.github.io/tft-s18-helper/board.html)
+### 1️⃣ 作战台 · [`board.html`](https://tft-s18-helper.app.workbuddy.host/board.html?sharecode=WMGGSW3OBW)
 开局引导 + 实时棋盘，是整个助手的主页面。
 
 - **开局引导**：先决定这局怎么赢，再开始抓牌
@@ -19,7 +19,7 @@
 - **缺牌替代方案**：缺谁点谁，立刻给出替代棋子和转线按钮
 - 覆盖 S18「自然之力」赛季的主流阵容体系
 
-### 2️⃣ 作战手册 · [`manual.html`](https://rng-chovy.github.io/tft-s18-helper/manual.html)
+### 2️⃣ 作战手册 · [`manual.html`](https://tft-s18-helper.app.workbuddy.host/manual.html?sharecode=WMGGSW3OBW)
 一页看完全赛季的决策依据，不用再翻攻略视频。
 
 - **阵容详表**：每套阵容的装备 / 运营节奏 / 海克斯选择 / 放弃时机
@@ -27,7 +27,7 @@
 - **高频符文库** + **纹章 / 自然之力的断点规矩**
 - **三阶段胜负判断**：开局先定赢法、每阶段该看什么数字、什么信号出现立刻换路子
 
-### 3️⃣ 经济规划器 · [`econ.html`](https://rng-chovy.github.io/tft-s18-helper/econ.html)
+### 3️⃣ 经济规划器 · [`econ.html`](https://tft-s18-helper.app.workbuddy.host/econ.html?sharecode=WMGGSW3OBW)
 把"我这波该不该 D 牌"变成一道算术题。
 
 - **当前局面**：填入回合 / 血量 / 金币
@@ -41,7 +41,7 @@
 
 | 方式 | 操作 |
 |---|---|
-| 直接使用 | 打开 <https://rng-chovy.github.io/tft-s18-helper/> |
+| 直接使用 | 打开 <https://tft-s18-helper.app.workbuddy.host/?sharecode=WMGGSW3OBW> |
 | 装成 App | 手机浏览器打开 → 「添加到主屏幕」 |
 | 本地运行 | 双击 `index.html`，或 `python -m http.server` 后访问 |
 
